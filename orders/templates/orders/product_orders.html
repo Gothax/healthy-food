@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{orders.seller}}{{ product.name }}</title>
+</head>
+<body>
+    <h1>{{orders.seller.username}}{{ product.name }}</h1>
+    <ul>
+        {% for order in orders %}
+            <li>주문번호: {{ order.id }} - 주문일시: {{ order.created_at }}</li>
+            <p>판매자: {{ order.seller.user.username }}</p>
+            <p>구매자: {{ order.user.username }}</p>
+            <p>구매 상품:</p>
+            <ul>
+                {% for item in order.order_items.all %}
+                    <li>{{ item.menu.name }} - 수량: {{ item.quantity }}</li>
+                {% endfor %}
+            </ul>
+            <p>구매 배송지: {{ order.address }}</p>
+        {% endfor %}
+    </ul>
+</body>
+</html>
