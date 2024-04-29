@@ -15,6 +15,7 @@ class Product(models.Model):
     price = models.IntegerField()
     seller = models.ForeignKey(User, on_delete=models.CASCADE)
     specific = models.CharField(max_length=100)
+    stock = models.IntegerField()
     
     def __str__(self):
         return self.name
