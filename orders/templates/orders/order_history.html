@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{request.user.username}}구매 기록</title>
+</head>
+<body>
+    <h1>{{request.user.username}}구매 기록</h1>
+    <ul>
+        {% for order in orders %}
+            <li>주문번호: {{ order.id }} - 주문일시: {{ order.created_at }}</li>
+            <ul>
+                {% for item in order.order_items.all %}
+                    <li>{{ item.menu.name }} - 수량: {{ item.quantity }}</li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+{% endblock %}

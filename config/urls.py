@@ -26,7 +26,13 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('login/', views.login, name='login'),
     path('accounts/', include('django.contrib.auth.urls')),
+<<<<<<< HEAD
     path('accounts/register/', views.register_user, name='register'),
+=======
+    path('order/', include('orders.urls')),
+
+    path('accounts/register/', views.UserCreateView.as_view(), name='register'),
+>>>>>>> afe24572985271179b2445ebc3d0733e766aee0c
     path('accounts/register/done/', views.UserCreateDoneTV.as_view(), name='register_done'),
     path('check_duplicate/', views.check_duplicate, name='check_duplicate'),
     

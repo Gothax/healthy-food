@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404,redirect
+from django.shortcuts import render, get_object_or_404,redirect #redirect추가
 from .models import Content, FeedImage
 from django.contrib.auth.models import User
 from userprofile.models import Profile
@@ -61,11 +61,9 @@ class ReviewCreateView(CreateView):
 
 def post_detail(request, pk):
     post = get_object_or_404(Content, pk=pk)
-    commentform = CommentForm()  # (추가)forms.py에있는 CommentForm 가지고옴
+    commentform = CommentForm()  # (추가) forms.py에있는 CommentForm 가지고옴
     return render(request, 'feed/post_detail.html', {'post': post,'commentform':commentform})  #(추가)
-# -----------------------------------------------------------------
-
-
+# -----------------댓글저장 로직 추가--------------------------------------------
 
 def comments_create(request, pk):
     if request.method == 'POST':
@@ -77,5 +75,5 @@ def comments_create(request, pk):
             comment.content = content  # 게시물 번호 가져와서 게시물 지정함
             comment.save() #DB저장
 
-    return redirect('feed:post_detail', pk=pk)
+    return redirect('feed:post_detail', pk=pk) #저장하고 그자리
 

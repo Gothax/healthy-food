@@ -1,0 +1,22 @@
+<!-- orders/templates/orders/order_detail.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Detail</title>
+</head>
+<body>
+    <h1>주문 완료</h1>
+    <p><strong>주문번호:</strong> {{ order.id }}</p>
+    <p><strong>배송지:</strong> {{ order.address }}</p>
+    <hr>
+    <h2>상품</h2>
+    <ul>
+        {% for order_item in order_items %}
+            <li>{{ order_item.menu }} - Quantity: {{ order_item.quantity }}</li>
+        {% endfor %}
+        <a href="{% url 'orders:order_history' %}" class="btn btn-primary">구매내역 보기</a>
+    </ul>
+</body>
+</html>
