@@ -1,10 +1,10 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404,redirect
 from .models import Content, FeedImage
 from django.contrib.auth.models import User
 from userprofile.models import Profile
 from django.views.generic import ListView, CreateView
 from .models import *
-from .forms import ContentForm, ReviewContentForm
+from .forms import ContentForm, ReviewContentForm, CommentForm
 from django.urls import reverse_lazy
 
 class ContentListView(ListView):
@@ -45,6 +45,8 @@ class ContentCreateView(CreateView):
         
         return super().form_valid(form)
     
+
+    
 # 구매기록에서 라우팅
 class ReviewCreateView(CreateView):
     model = Content
@@ -59,4 +61,21 @@ class ReviewCreateView(CreateView):
 
 def post_detail(request, pk):
     post = get_object_or_404(Content, pk=pk)
-    return render(request, 'feed/post_detail.html', {'post': post})
+    commentform = CommentForm()  # (추가)forms.py에있는 CommentForm 가지고옴
+    return render(request, 'feed/post_detail.html', {'post': post,'commentform':commentform})  #(추가)
+# -----------------------------------------------------------------
+
+
+
+def comments_create(request, pk):
+    if request.method == 'POST':
+        content = get_object_or_404(Content, pk=pk)  # 게시물을 번호가지고옴
+        commentform = CommentForm(request.POST) # 값을받아 폼에 저장
+        if commentform.is_valid():
+            comment = commentform.save(commit=False) # commit=False -> 임시저장
+            comment.user = request.user  # 현재 사용자를 댓글 작성자로 지정
+            comment.content = content  # 게시물 번호 가져와서 게시물 지정함
+            comment.save() #DB저장
+
+    return redirect('feed:post_detail', pk=pk)
+

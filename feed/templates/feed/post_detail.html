@@ -50,14 +50,30 @@
         
         {% if post.content_type == 'review' and post.product %}
           <hr>
-          <h5>제툼 리뷰</h5>
-          <p>제툼명: {{ post.product.name }}</p>
+          <h5>제품 리뷰</h5>
+          <p>제품명: {{ post.product.name }}</p>
           <p>판매자: {{ post.seller.username }}</p>
         {% endif %}
       </div>
       <div class="card-footer text-muted">
         <p> {{ post.created_at|date:"Y-m-d H:i" }} </p>
       </div>
+      <!-- ----------------- 추가------------------------------  -->
+    {% for comment in post.comment_set.all %}   <!-- Content의 키값post를 참조받고있는 comment을 _set 객체 다가지고옴 -->
+                <div>
+                    <p>{{ comment.comment_text }}</p>
+                    <p>작성자: {{ comment.user.username }}</p>
+                    <p>작성일시: {{ comment.created_at }}</p>
+                </div>
+            {% empty %}
+                <p>댓글이 없습니다.</p>
+            {% endfor %}
+      <form action="{% url 'feed:comments_create' post.id %}" method="post">
+        {% csrf_token %}
+        {{ commentform }}
+        <button type="submit">작성</button>
+    </form>
+    <!------------------------------------------------- -->
     </div>
 </div>
 {% endblock %}
