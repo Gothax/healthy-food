@@ -38,3 +38,5 @@ class Comment(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)  # 댓글을 작성한 사용자
     comment_text = models.TextField()  # 댓글 내용
     created_at = models.DateTimeField(auto_now_add=True)  # 댓글 작성일자
+    updated_at = models.DateTimeField(auto_now=True) #수정날짜 추가**
+    likes = models.ManyToManyField(User, related_name='comment_likes', blank=True) # 다 대 다 구조 댓글 좋아요 추가**

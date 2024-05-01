@@ -2,12 +2,15 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Content, FeedImage, Like
 from django.contrib.auth.models import User
 from userprofile.models import Profile
-from django.views.generic import ListView, CreateView, DetailView
+from django.views.generic import ListView, CreateView
 from .models import *
 from .forms import ContentForm, ReviewContentForm, CommentForm
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
+from django.db.models import Count
+from django.http import JsonResponse
+
 
 @login_required
 def like_content(request, content_id):
@@ -76,19 +79,34 @@ class ReviewCreateView(CreateView):
 def post_detail(request, pk):
     post = get_object_or_404(Content, pk=pk)
     commentform = CommentForm()  
-    return render(request, 'feed/post_detail.html', {'post': post,'commentform':commentform})  
 
+    # 댓글을 좋아요 개수를 기준으로 정렬하여 가져옴
+    comments = post.comment_set.annotate(num_likes=Count('likes')).order_by('-num_likes')
+
+    # 가장 많은 좋아요를 받은 첫 번째 댓글을 설정
+    most_liked_comment = comments.first()
+
+    # most_liked_comment이 None이 아닌 경우에만 나머지 댓글을 날짜순으로 정렬하여 가져옴
+    other_comments = None
+    if most_liked_comment:
+        other_comments = comments.exclude(pk=most_liked_comment.pk).order_by('-created_at')
+
+    return render(request, 'feed/post_detail.html', {'post': post, 'commentform': commentform, 'most_liked_comment': most_liked_comment, 'other_comments': other_comments})
+
+
+@login_required
 def comments_create(request, pk):
     if request.method == 'POST':
         content = get_object_or_404(Content, pk=pk)  
         commentform = CommentForm(request.POST) 
         if commentform.is_valid():
             comment = commentform.save(commit=False) 
-            comment.user = request.user  # 현재 사용자를 댓글 작성자로 지정
-            comment.content = content  # 게시물 번호 가져와서 게시물 지정함
-            comment.save() #DB저장
-
-    return redirect('feed:post_detail', pk=pk) 
+            comment.user = request.user  
+            comment.content = content  
+            comment.save() 
+            return redirect('feed:post_detail', pk=pk) 
+    else:
+        return redirect(reverse('login')) # 로그인안하면 로그인창으로
 
 # 댓글삭제 
 def comments_delete(request, pk):
@@ -98,12 +116,34 @@ def comments_delete(request, pk):
 
     return redirect('feed:post_detail', pk=comment.content.pk)
         
-def view_user(request, pk):
-    user = User.objects.get(pk=pk)
-    posts = Content.objects.filter(user=pk, content_type='post')
-    reviews = Content.objects.filter(user=pk, content_type='review')
-    context = {'user': user,
-                'posts': posts,
-                'reviews': reviews,
-                }
-    return render(request, 'feed/view_user_page.html', context)
+# 댓글수정
+def comments_update(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    if request.method == "POST":
+        form = CommentForm(request.POST, instance=comment)  # 기존 데이터를 전달하려면 instance 사용
+        if form.is_valid():
+            form.save()  # 수정된 내용을 저장
+            return redirect('feed:post_detail', pk=comment.content.pk)  # 수정하고 원래 있던페이지로
+    else:
+        form = CommentForm(instance=comment)  # GET 요청일 때는 기존 댓글 데이터를 가지고 있는 폼을 생성.
+    return render(request, 'feed/comment_update.html', {'form': form})  # 수정 폼을 템플릿으로 전달
+
+# 댓글좋아요
+@login_required
+def comment_like(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    if request.method == 'POST':
+        # 현재 로그인한 사용자가 해당 댓글을 이미 좋아요 했는지 확인
+        if request.user in comment.likes.all():
+            # 이미 좋아요한 경우, 좋아요 취소
+            comment.likes.remove(request.user)
+            liked = False
+        else:
+            # 좋아요 추가
+            comment.likes.add(request.user)
+            liked = True
+        # 좋아요 수를 반환
+        likes_count = comment.likes.count()
+        return JsonResponse({'liked': liked, 'likes_count': likes_count})
+    else:
+        return JsonResponse({}, status=405)  # POST 요청만 허용

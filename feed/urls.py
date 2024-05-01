@@ -11,7 +11,9 @@ urlpatterns = [
     path('post/<int:pk>/', views.post_detail, name='post_detail'),
 
     path('like/<int:content_id>/', like_content, name='like_content'),
-    path('comment/create/<int:pk>/', views.comments_create, name='comments_create'), #추가1
-    path('comment/delete/<int:pk>/', views.comments_delete, name='comments_delete'), #추가 2
-    path('user/<int:pk>/', views.view_user, name='view_user')
+    path('comment/create/<int:pk>/', views.comments_create, name='comments_create'), 
+    path('comment/delete/<int:pk>/', views.comments_delete, name='comments_delete'), 
+    path('comment/update/<int:pk>/',views.comments_update,name ='comments_update'), #추가1
+    path('comment_like/<int:pk>/', views.comment_like, name='comment_like'),#추가2  
+    
     ]
