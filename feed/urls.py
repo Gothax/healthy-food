@@ -16,5 +16,7 @@ urlpatterns = [
     path('comment/update/<int:pk>/',views.comments_update,name ='comments_update'), #추가1
     path('comment_like/<int:pk>/', views.comment_like, name='comment_like'),#추가2  
     path('user/<int:pk>/', views.view_user, name='view_user'),
+
+    
     
     ]

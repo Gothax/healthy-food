@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
 <!-- 이거 라이브러리 넣어야 좋아요 하트가 되더라구요...-->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
@@ -17,29 +16,22 @@
   .carousel-item {
     transition: transform 1s ease, opacity 0.5s ease; 
   }
+  
   .comment {
     margin-bottom: 20px;
   }
   .comment-content.collapsed {
     display: none;
   }
-  /* 댓글 입력 텍스트 창 스타일 */
-  .comment-input {
-    width: 100%; /* 가로폭을 최대한 차지하도록 설정 */
-    padding: 10px; /* 내부 여백 설정 */
-    border: 1px solid #ced4da; /* 테두리 설정 */
-    border-radius: 5px; /* 테두리를 둥글게 만듦 */
-    resize: none; /* 수직으로만 크기 조절 가능하도록 설정 */
-    min-height: 100px; /* 최소 높이 설정 */
-    font-size: 16px; /* 글꼴 크기 설정 */   
-  }
+  .post-body.collapsed {
+    max-height: 3em; /* 세 줄로 제한 */
+    overflow: hidden; /* 초과 텍스트 숨김 */
+}
 
-  /* 입력 텍스트 창에 포커스가 있을 때 테두리 색상 변경 */
-  .comment-input:focus {
-    border-color: #80bdff; /* 포커스가 있을 때의 테두리 색상 설정 */
-    outline: 0; /* 기본 포커스 효과 제거 */
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* 포커스가 있을 때의 테두리 효과 설정 */
-  }
+.post-body.expand {
+    max-height: none; /* 내용 전체 표시 */
+}
+
 </style>
 
 <div class="container mt-5">
@@ -71,14 +63,12 @@
             <h2>{{ post.title }}</h2>
             <p class="mt-3">{{ post.body_text }}</p>
     
-    
             {% if user in post.likes.all %}
               <a href="{% url 'feed:like_content' post.id %}" class="no-underline">❤️</a>
             {% else %}
               <a href="{% url 'feed:like_content' post.id %}" class="no-underline">🤍</a>
             {% endif %}
             : {{ post.likes.count }}
-    
     
             {% if post.content_type == 'review' and post.product %}
               <hr>
@@ -91,181 +81,291 @@
             <p> {{ post.created_at|date:"Y-m-d H:i" }} </p>
           </div>
 
-      <!-- ----------------- 추가------------------------------  -->
-      <div class="card-footer">
-        <!-- 좋아요가 많은 댓글 -->
-        {% if most_liked_comment %}
-            <div class="comment-container">
-                <div class="comment-header">
-                    <h6>{{ most_liked_comment.user.username }}</h6>
-                    <div class="comment-actions row justify-content-between">
-                        <div class="col-auto">
-                            {% if request.user == most_liked_comment.user or request.user.is_staff %}
-                                <form action="{% url 'feed:comments_delete' most_liked_comment.pk %}" method="post" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-link">삭제</button>
-                                </form>
-                            {% endif %}
-                        </div>
-                        <div class="col-auto">
-                            {% if request.user == most_liked_comment.user or request.user.is_staff %}
-                                <a href="{% url 'feed:comments_update' most_liked_comment.pk %}" class="btn btn-secondary">수정</a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                <p>{{ most_liked_comment.comment_text }}</p>
-                <!-- 좋아요 버튼 -->
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-auto">
-                        <button class="like-btn btn-primary" data-comment-id="{{ most_liked_comment.pk }}">
-                            {% if request.user.is_authenticated %}
-                                {% if request.user in most_liked_comment.likes.all %}
-                                    <i class="fas fa-heart text-danger"></i> <!-- 좋아요를 누른 경우 -->
-                                {% else %}
-                                    <i class="far fa-heart text-secondary"></i> <!-- 좋아요를 누르지 않은 경우 -->
-                                {% endif %}
-                            {% else %}
-                                <i class="far fa-heart text-secondary"></i> <!-- 로그인하지 않은 경우 -->
-                            {% endif %}
-                        </button>
-                    </div>
-                    <div class="col-auto">
-                        <span class="like-count">{{ most_liked_comment.likes.count }}</span> <!-- 좋아요 개수 표시 -->
-                    </div>
-                </div>
-                <!-- 수정되면 수정표시 나타냄 -->
-                <p class="comment-date">
-                    작성일시: {{ most_liked_comment.created_at }}
-                    {% if most_liked_comment.created_at != most_liked_comment.updated_at %}
-                        (수정됨)
-                    {% endif %}
-                </p>
+      <!-- ----------------- 모달 사용하여 위젯 생성------------------------------  -->
+      <div class="modal fade" id="commentWidgetModal" tabindex="-1" aria-labelledby="commentWidgetModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="commentWidgetModalLabel">댓글({{comments_count}})</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        {% endif %}
+            <div class="modal-body">
+                <div class="card-body">
+                    <h2><a href="{% url 'feed:view_user' post.user.id %}">{{ post.user.username }}</a></h2>
+                    <h2>{{ post.title }}</h2>
+                    <p class="mt-3 post-body collapsed">{{ post.body_text }}</p>
+                    <!-- 게시물 내용의 더보기 버튼 -->
+                    <button class="btn btn-sm btn-secondary expand-button">더보기</button>
+                    <!-- 게시물 내용의 접기 버튼(초기에는 숨겨둠) -->
+                    <button class="btn btn-sm btn-secondary collapse-button" style="display: none;">접기</button>
+                    
 
-        <!-- 나머지 댓글들 -->
-        {% for comment in other_comments %}
-            <div class="comment-container {% if forloop.counter > 1 %}hidden{% endif %}">
-                <div class="comment-header">
-                    <h6>{{ comment.user.username }}</h6>
-                    <div class="comment-actions row justify-content-between">
-                        <div class="col-auto">
-                            {% if request.user == comment.user or request.user.is_staff %}
-                                <form action="{% url 'feed:comments_delete' comment.pk %}" method="post" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-link">삭제</button>
-                                </form>
-                            {% endif %}
-                        </div>
-                        <div class="col-auto">
-                            {% if request.user == comment.user or request.user.is_staff %}
-                                <a href="{% url 'feed:comments_update' comment.pk %}" class="btn btn-secondary">수정</a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                <p>{{ comment.comment_text }}</p>
-                <!-- 좋아요 버튼 -->
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-auto">
-                        <button class="like-btn" data-comment-id="{{ comment.pk }}">
-                            {% if request.user.is_authenticated %}
-                                {% if request.user in comment.likes.all %}
-                                    <i class="fas fa-heart text-danger"></i> <!-- 좋아요를 누른 경우 -->
-                                {% else %}
-                                    <i class="far fa-heart text-secondary"></i> <!-- 좋아요를 누르지 않은 경우 -->
-                                {% endif %}
-                            {% else %}
-                                <i class="far fa-heart text-secondary"></i> <!-- 로그인하지 않은 경우 -->
-                            {% endif %}
-                        </button>
-                    </div>
-                    <div class="col-auto">
-                        <span class="like-count">{{ comment.likes.count }}</span> <!-- 좋아요 개수 표시 -->
-                    </div>
-                </div>
-                <!-- 수정되면 수정표시 나타냄 -->
-                <p class="comment-date">
-                    작성일시: {{ comment.created_at }}
-                    {% if comment.created_at != comment.updated_at %}
-                        (수정됨)
+                    {% if post.content_type == 'review' and post.product %}
+                        <hr>
+                        <h5>제품 리뷰</h5>
+                        <p>제품명: {{ post.product.name }}</p>
+                        <p>판매자: {{ post.seller.username }}</p>
                     {% endif %}
-                </p>
+                </div>
+                <div class="card-footer text-muted">
+                    <p> {{ post.created_at|date:"Y-m-d H:i" }} </p>
+                  </div>
+                </div>
+              <!-- 댓글 전체 표시 -->
+              <div class="modal-header">
+                <h5 class="modal-title">댓글 입력</h5>
+                
             </div>
-        {% empty %}
-            <p>댓글이 없습니다.</p>
-        {% endfor %}
-    
-        <!-- 더보기 버튼 -->
-        {% if other_comments|length > 1 %}
-            <button id="load-more-btn" class="btn btn-primary mt-3">더 보기</button>
-        {% endif %}
-        
-        <!-- 댓글 입력 텍스트 창 --> 
-        <form id="comment-form" action="{% url 'feed:comments_create' post.id %}" method="post">
-            {% csrf_token %}
-            <textarea class="form-control comment-input" id="comment-text" name="comment_text" rows="3" placeholder="댓글을 입력하세요..."></textarea>
-            <button type="submit" class="btn btn-primary mt-3">작성</button>
-        </form>
-        
+            <div class="modal-body">
+                <form id="comment-form" action="{% url 'feed:comments_create' post.id %}" method="post">
+                    {% csrf_token %}
+                    <textarea class="form-control" id="comment-text" name="comment_text" rows="3" placeholder="댓글을 입력하세요..."></textarea>
+                    <button type="submit" class="btn btn-primary mt-3">작성</button>
+                </form>
+            </div>
+            
+
+<!-- 댓글들 -->
+<div class="">
+    {% if most_liked_comment %}
+    <div class="comment-container">
+        <div class="comment-header">
+            <h6>{{ most_liked_comment.user.username }}</h6>
+            <div class="comment-actions row justify-content-between">
+                <div class="col-auto">
+                    {% if request.user == most_liked_comment.user or request.user.is_staff %}
+                    <form action="{% url 'feed:comments_delete' most_liked_comment.pk %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link">삭제</button>
+                    </form>
+                    {% endif %}
+                </div>
+                <div class="col-auto">
+                    {% if request.user == most_liked_comment.user or request.user.is_staff %}
+                    <a href="{% url 'feed:comments_update' most_liked_comment.pk %}" class="btn btn-secondary">수정</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <p>{{ most_liked_comment.comment_text }}</p>
+        <!-- 좋아요 버튼 -->
+        <div class="row justify-content-between align-items-center">
+            <div class="col-auto">
+                <span class="like-count">좋아요({{ most_liked_comment.likes.count }})</span> <!-- 좋아요 개수 표시 -->
+            </div>
+            <div class="col-auto">
+                <button class="like-btn btn-primary" data-comment-id="{{ most_liked_comment.pk }}">
+                    {% if request.user.is_authenticated %}
+                    {% if request.user in most_liked_comment.likes.all %}
+                    <i class="fas fa-heart text-danger"></i> <!-- 좋아요를 누른 경우 -->
+                    {% else %}
+                    <i class="far fa-heart text-secondary"></i> <!-- 좋아요를 누르지 않은 경우 -->
+                    {% endif %}
+                    {% else %}
+                    <i class="far fa-heart text-secondary"></i> <!-- 로그인하지 않은 경우 -->
+                    {% endif %}
+                </button>
+            </div>
+        </div>
+        <!-- 수정되면 수정표시 나타냄 -->
+        <p class="comment-date">
+            작성일시: {{ most_liked_comment.created_at }}
+            {% if most_liked_comment.created_at != most_liked_comment.updated_at %}
+            (수정됨)
+            {% endif %}
+        </p>
     </div>
+    {% endif %}
+
+    <!-- 나머지 댓글들 -->
+    {% for comment in other_comments %}
+    <div class="comment-container {% if forloop.counter > 1 %}hidden{% endif %}">
+        <div class="comment-header">
+            <h6>{{ comment.user.username }}</h6>
+            <div class="comment-actions row justify-content-between">
+                <div class="col-auto">
+                    {% if request.user == comment.user or request.user.is_staff %}
+                    <form action="{% url 'feed:comments_delete' comment.pk %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link">삭제</button>
+                    </form>
+                    {% endif %}
+                </div>
+                <div class="col-auto">
+                    {% if request.user == comment.user or request.user.is_staff %}
+                    <a href="{% url 'feed:comments_update' comment.pk %}" class="btn btn-secondary">수정</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <p>{{ comment.comment_text }}</p>
+        <!-- 좋아요 버튼 -->
+        <div class="row justify-content-between align-items-center">
+            <div class="col-auto">
+                <span class="like-count">좋아요({{ comment.likes.count }})</span> <!-- 좋아요 개수 표시 -->
+            </div>
+            <div class="col-auto">
+                <button class="like-btn" data-comment-id="{{ comment.pk }}">
+                    {% if request.user.is_authenticated %}
+                    {% if request.user in comment.likes.all %}
+                    <i class="fas fa-heart text-danger"></i> <!-- 좋아요를 누른 경우 -->
+                    {% else %}
+                    <i class="far fa-heart text-secondary"></i> <!-- 좋아요를 누르지 않은 경우 -->
+                    {% endif %}
+                    {% else %}
+                    <i class="far fa-heart text-secondary"></i> <!-- 로그인하지 않은 경우 -->
+                    {% endif %}
+                </button>
+            </div>
+        </div>
+        <!-- 수정되면 수정표시 나타냄 -->
+        <p class="comment-date">
+            작성일시: {{ comment.created_at }}
+            {% if comment.created_at != comment.updated_at %}
+            (수정됨)
+            {% endif %}
+        </p>
+    </div>
+    {% empty %}
+    <p>댓글이 없습니다.</p>
+    {% endfor %}
+</div>
+
+
+            
+            
+
+
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ----------------- 모달 생성 끝 ------------------------------  -->
+
+      <!-- 좋아요가 많은 댓글만 표시 -->
+      {% if most_liked_comment %}
+      <div class="comment-container">
+          <!-- 최고 좋아요를 받은 댓글 표시 -->
+          <div class="comment-header">
+              <h6>{{ most_liked_comment.user.username }}</h6>
+              <div class="comment-actions row justify-content-between">
+                  <div class="col-auto">
+                      {% if request.user == most_liked_comment.user or request.user.is_staff %}
+                          <form action="{% url 'feed:comments_delete' most_liked_comment.pk %}" method="post" class="d-inline">
+                              {% csrf_token %}
+                              <button type="submit" class="btn btn-link">삭제</button>
+                          </form>
+                      {% endif %}
+                  </div>
+                  <div class="col-auto">
+                      {% if request.user == most_liked_comment.user or request.user.is_staff %}
+                          <a href="{% url 'feed:comments_update' most_liked_comment.pk %}" class="btn btn-secondary">수정</a>
+                      {% endif %}
+                  </div>
+              </div>
+          </div>
+          <p>{{ most_liked_comment.comment_text }}</p>
+          <!-- 좋아요 버튼 -->
+          <div class="row align-items-center">
+              <div class="col-auto">
+                  <button class="like-btn btn-primary" data-comment-id="{{ most_liked_comment.pk }}">
+                      {% if request.user.is_authenticated %}
+                          {% if request.user in most_liked_comment.likes.all %}
+                              <i class="fas fa-heart text-danger"></i> <!-- 좋아요를 누른 경우 -->
+                          {% else %}
+                              <i class="far fa-heart text-secondary"></i> <!-- 좋아요를 누르지 않은 경우 -->
+                          {% endif %}
+                      {% else %}
+                          <i class="far fa-heart text-secondary"></i> <!-- 로그인하지 않은 경우 -->
+                      {% endif %}
+                  </button>
+              </div>
+              <div class="col-auto">
+                  <span class="like-count">좋아요({{ most_liked_comment.likes.count }})</span> <!-- 좋아요 개수 표시 -->
+              </div>
+              <div class="col-auto">
+                  <p class="comment-date">작성일시: {{ most_liked_comment.created_at }}</p>
+                  {% if most_liked_comment.created_at != most_liked_comment.updated_at %}
+                      <p class="comment-date">(수정됨)</p>
+                  {% endif %}
+              </div>
+          </div>
+      </div>
+  {% else %}
+      <!-- 댓글이 없을 때 표시 -->
+      <p>댓글이 없습니다.</p>
+  {% endif %}
+  
+      
+      <!-- 더보기 버튼 -->
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#commentWidgetModal">
+        댓글 보기
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- AJAX를 사용하여 좋아요 요청을 보내고 응답을 처리하는 JavaScript 코드 -->
 <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 좋아요 버튼 클릭 이벤트 처리
+    document.querySelectorAll('.like-btn').forEach(function(button) {
+      button.addEventListener('click', function() {
+        var commentId = this.getAttribute('data-comment-id');
+        var likeCount = this.closest('.row').querySelector('.like-count');
+        var heartIcon = this.querySelector('i'); // 하트 아이콘
+
+        // AJAX를 사용하여 서버로 좋아요 요청을 보냄
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/feed/comment_like/' + commentId + '/');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+        xhr.onload = function() {
+          if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            // 서버로부터 좋아요 요청에 대한 응답을 받으면 좋아요 숫자를 업데이트
+            likeCount.textContent ='좋아요(' + response.likes_count + ')';
+
+            // 좋아요 버튼의 아이콘 변경
+            if (response.liked) {
+              heartIcon.classList.remove('far'); // 빈 하트 클래스 제거
+              heartIcon.classList.add('fas');  // 채워진 하트 클래스 추가
+              heartIcon.classList.add('text-danger'); // 하트 색상 변경
+            } else {
+              heartIcon.classList.remove('fas'); // 채워진 하트 클래스 제거
+              heartIcon.classList.add('far');  // 빈 하트 클래스 추가
+              heartIcon.classList.remove('text-danger'); // 하트 색상 제거
+            }
+          } else {
+            console.error('Request failed. Error: ' + xhr.status);
+          }
+        };
+        xhr.send(JSON.stringify({}));
+      });
+    });
+  });
+</script>
+
+<script>
     document.addEventListener('DOMContentLoaded', function() {
-        // 초기에는 숨겨진 댓글을 불러오는 버튼을 보이지 않게 설정
-        document.querySelectorAll('.hidden').forEach(function(comment) {
-            comment.style.display = 'none';
-        });
-
-        // 더보기 버튼 클릭 이벤트 처리
-        document.getElementById('load-more-btn').addEventListener('click', function() {
-            // 숨겨진 댓글을 보이도록 설정
-            document.querySelectorAll('.hidden').forEach(function(comment) {
-                comment.style.display = 'block';
-            });
-
-            // 더보기 버튼을 숨김
-            this.style.display = 'none';
-        });
-        
-        // 좋아요 버튼 클릭 이벤트 처리
-        document.querySelectorAll('.like-btn').forEach(function(button) {
+        // 더보기/접기 버튼 클릭 이벤트 처리
+        document.querySelectorAll('.expand-button, .collapse-button').forEach(function(button) {
             button.addEventListener('click', function() {
-                var commentId = this.getAttribute('data-comment-id');
-                var likeCount = this.closest('.row').querySelector('.like-count');
-                var heartIcon = this.querySelector('i'); // 하트 아이콘
-
-                // AJAX를 사용하여 서버로 좋아요 요청을 보냄
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', '/feed/comment_like/' + commentId + '/');
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
-                xhr.onload = function() {
-                    if (xhr.status === 200) {
-                        var response = JSON.parse(xhr.responseText);
-                        // 서버로부터 좋아요 요청에 대한 응답을 받으면 좋아요 숫자를 업데이트
-                        likeCount.textContent = response.likes_count;
-                        
-                        // 좋아요 버튼의 아이콘 변경
-                        if (response.liked) {
-                            heartIcon.classList.remove('far'); // 빈 하트 클래스 제거
-                            heartIcon.classList.add('fas');  // 채워진 하트 클래스 추가
-                            heartIcon.classList.add('text-danger'); // 하트 색상 변경
-                        } else {
-                            heartIcon.classList.remove('fas'); // 채워진 하트 클래스 제거
-                            heartIcon.classList.add('far');  // 빈 하트 클래스 추가
-                            heartIcon.classList.remove('text-danger'); // 하트 색상 제거
-                        }
-                    } else {
-                        console.error('Request failed. Error: ' + xhr.status);
-                    }
-                };
-                xhr.send(JSON.stringify({}));
+                var postBody = this.closest('.card-body').querySelector('.post-body');
+                postBody.classList.toggle('collapsed');
+                postBody.classList.toggle('expand');
+                // 더보기 버튼과 접기 버튼 표시/숨김 처리
+                this.closest('.card-body').querySelector('.expand-button').style.display = postBody.classList.contains('collapsed') ? 'inline-block' : 'none';
+                this.closest('.card-body').querySelector('.collapse-button').style.display = postBody.classList.contains('expand') ? 'inline-block' : 'none';
             });
         });
     });
-</script>
+    </script>
+    
+    
+    
+    
+    
+
 {% endblock %}

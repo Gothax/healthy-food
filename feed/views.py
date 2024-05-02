@@ -76,6 +76,8 @@ class ReviewCreateView(CreateView):
         form.instance.content_type = 'review'
         return super().form_valid(form)
 
+
+
 def post_detail(request, pk):
     post = get_object_or_404(Content, pk=pk)
     commentform = CommentForm()  
@@ -91,7 +93,11 @@ def post_detail(request, pk):
     if most_liked_comment:
         other_comments = comments.exclude(pk=most_liked_comment.pk).order_by('-created_at')
 
-    return render(request, 'feed/post_detail.html', {'post': post, 'commentform': commentform, 'most_liked_comment': most_liked_comment, 'other_comments': other_comments})
+    # 댓글의 총 개수 계산
+    comments_count = comments.count()
+
+    return render(request, 'feed/post_detail.html', {'post': post, 'commentform': commentform, 'most_liked_comment': most_liked_comment, 'other_comments': other_comments, 'comments_count': comments_count})
+
 
 
 @login_required
