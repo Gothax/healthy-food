@@ -66,26 +66,30 @@
           </div>
         {% endif %}
         
-        <h2>{{ post.user.username }}</h2>
-
-        <h2>{{ post.title }}</h2>
-        <p class="mt-3">{{ post.body_text }}</p>
-
-        <!-- 좋아요 버튼 등 추가 기능 구현 -->
-        좋아요 수: {{ post.likes.count }}
-
-        
-        {% if post.content_type == 'review' and post.product %}
-          <hr>
-          <h5>제품 리뷰</h5>
-          <p>제품명: {{ post.product.name }}</p>
-          <p>판매자: {{ post.seller.username }}</p>
-        {% endif %}
-      </div>
-      <div class="card-footer text-muted">
-        <p> {{ post.created_at|date:"Y-m-d H:i" }} </p>
-      </div>
-          <!-- 추가된 부분: 최신순, 오래된순 버튼 -->
+        <div class="card-body">
+            <h2><a href="{% url 'feed:view_user' post.user.id %}">{{ post.user.username }}</a></h2>
+            <h2>{{ post.title }}</h2>
+            <p class="mt-3">{{ post.body_text }}</p>
+    
+    
+            {% if user in post.likes.all %}
+              <a href="{% url 'feed:like_content' post.id %}" class="no-underline">❤️</a>
+            {% else %}
+              <a href="{% url 'feed:like_content' post.id %}" class="no-underline">🤍</a>
+            {% endif %}
+            : {{ post.likes.count }}
+    
+    
+            {% if post.content_type == 'review' and post.product %}
+              <hr>
+              <h5>제품 리뷰</h5>
+              <p>제품명: {{ post.product.name }}</p>
+              <p>판매자: {{ post.seller.username }}</p>
+            {% endif %}
+          </div>
+          <div class="card-footer text-muted">
+            <p> {{ post.created_at|date:"Y-m-d H:i" }} </p>
+          </div>
 
       <!-- ----------------- 추가------------------------------  -->
       <div class="card-footer">

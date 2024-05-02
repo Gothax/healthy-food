@@ -115,18 +115,35 @@ def comments_delete(request, pk):
         comment.delete()
 
     return redirect('feed:post_detail', pk=comment.content.pk)
+def view_user(request, pk):
+    user = User.objects.get(pk=pk)
+    posts = Content.objects.filter(user=pk, content_type='post')
+    reviews = Content.objects.filter(user=pk, content_type='review')
+    context = {'user': user,
+                'posts': posts,
+                'reviews': reviews,
+                }
+    return render(request, 'feed/view_user_page.html', context)
         
 # 댓글수정
+from django.core.exceptions import PermissionDenied
+
 def comments_update(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
+    
+    # 현재 요청을 보낸 사용자와 댓글의 작성자를 비교하여 권한을 검사
+    if request.user != comment.user:
+        # 권한이 없는 경우 404 에러 대신에 PermissionDenied 예외 발생
+        raise PermissionDenied("댓글 수정 권한이 없습니다.")
+    
     if request.method == "POST":
-        form = CommentForm(request.POST, instance=comment)  # 기존 데이터를 전달하려면 instance 사용
+        form = CommentForm(request.POST, instance=comment)
         if form.is_valid():
-            form.save()  # 수정된 내용을 저장
-            return redirect('feed:post_detail', pk=comment.content.pk)  # 수정하고 원래 있던페이지로
+            form.save()
+            return redirect('feed:post_detail', pk=comment.content.pk)
     else:
-        form = CommentForm(instance=comment)  # GET 요청일 때는 기존 댓글 데이터를 가지고 있는 폼을 생성.
-    return render(request, 'feed/comment_update.html', {'form': form})  # 수정 폼을 템플릿으로 전달
+        form = CommentForm(instance=comment)
+    return render(request, 'feed/comment_update.html', {'form': form})
 
 # 댓글좋아요
 @login_required
@@ -147,3 +164,4 @@ def comment_like(request, pk):
         return JsonResponse({'liked': liked, 'likes_count': likes_count})
     else:
         return JsonResponse({}, status=405)  # POST 요청만 허용
+
