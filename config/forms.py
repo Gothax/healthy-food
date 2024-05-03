@@ -57,8 +57,6 @@ class CustomUserCreationForm(UserCreationForm):
       self.fields['password1'].widget.attrs.update({'class': 'form-control', 'type': 'password'})
       # password2 필드에 form-control 클래스를 추가
       self.fields['password2'].widget.attrs.update({'class': 'form-control', 'type': 'password'})
-      # # email 필드에 form-control 클래스를 추가
-      # self.fields['email'].widget.attrs.update({'class': 'form-control'})
 
 class ProfileForm(forms.ModelForm):
     user_image = forms.ImageField(label='프로필 이미지', required=False, widget=forms.FileInput(attrs={'class': 'form-control-file'}))
@@ -70,7 +68,7 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ('user_image', 'nickname', 'phone_number', 'address', 'detailed_address', 'is_seller')
+        fields = ('nickname', 'user_image', 'phone_number', 'address', 'detailed_address', 'is_seller')
 
     def save(self, user=None, commit=True):  # user 인자 추가
       profile = super().save(commit=False)  # commit=False로 호출

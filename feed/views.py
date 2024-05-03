@@ -5,9 +5,12 @@ from userprofile.models import Profile
 from django.views.generic import ListView, CreateView, DetailView
 from .models import *
 from orders.models import OrderItem
-from .forms import ContentForm, ReviewContentForm, CommentForm
+from .forms import ContentForm, CommentForm
 from django.urls import reverse_lazy
 from django.urls import reverse
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -82,6 +85,7 @@ class ContentCreateView(CreateView):
     form_class = ContentForm
     template_name = 'feed/post_create.html'
     success_url = reverse_lazy('feed:post-create')  
+    success_url = reverse_lazy('feed:post-create')  
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -111,15 +115,31 @@ class ContentCreateView(CreateView):
 def add_product_info_to_session(request):
     product_id = request.GET.get('product_id')
     seller_id = request.GET.get('seller_id')
+    order_id = request.GET.get('order_id')
     # 세션에 product_id와 seller_id 저장
     request.session['product_id'] = product_id
     request.session['seller_id'] = seller_id
+    request.session['order_id'] = order_id
     return redirect('feed:review-create')
 
     
 # 구매기록에서 라우팅
 class ReviewCreateView(CreateView):
     model = Content
+    form_class = ContentForm
+    template_name = 'feed/post_create.html'
+    success_url = reverse_lazy('orders:order_history')  
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
     form_class = ContentForm
     template_name = 'feed/post_create.html'
     success_url = reverse_lazy('orders:order_history')  
@@ -157,6 +177,9 @@ class ReviewCreateView(CreateView):
         if not user_has_purchased:
             return HttpResponseForbidden('구매한 상품만 리뷰할 수 있습니다.')
         
+
+
+        
         # 폼 데이터 저장 전 미리 인스턴스를 만들지만, DB에는 아직 저장하지 않음
         self.object = form.save(commit=False)
         self.object.user = self.request.user
@@ -164,6 +187,16 @@ class ReviewCreateView(CreateView):
         self.object.product_id = product_id
         self.object.content_type = 'review'
         self.object.save()
+        
+        # 주문 id와 product로 조회한 주문 구성요소
+        order_item = OrderItem.objects.get(
+        order__id=self.request.session.get('order_id'),  
+        product_id=product_id,
+    )
+        
+        if order_item:
+            order_item.review = self.object  
+            order_item.save()  
 
         # 이미지 처리
         images = self.request.FILES.getlist('images')  # 'images'는 템플릿에서 input 태그의 name 속성값
@@ -173,7 +206,9 @@ class ReviewCreateView(CreateView):
         # 세션에서 삭제
         del self.request.session['seller_id']
         del self.request.session['product_id']
+        del self.request.session['order_id']
         return super().form_valid(form)
+    
     
 
 def post_detail(request, pk):
@@ -202,11 +237,23 @@ def comments_delete(request, pk):
     return redirect('feed:post_detail', pk=comment.content.pk)
         
 def view_user(request, pk):
-    user = User.objects.get(pk=pk)
-    posts = Content.objects.filter(user=pk, content_type='post')
-    reviews = Content.objects.filter(user=pk, content_type='review')
-    context = {'user': user,
-                'posts': posts,
-                'reviews': reviews,
-                }
-    return render(request, 'feed/view_user_page.html', context)
+    if request.user.id != pk:
+        user = User.objects.get(pk=pk)
+        products = Product.objects.filter(seller=pk).prefetch_related('images')
+        product_images = {}
+        for product in products:
+            product_images[product.id] = product.images.first().image_url if product.images.exists() else None
+        received_reviews = Content.objects.filter(seller=pk, content_type='review')
+        posts = Content.objects.filter(user=pk)
+        is_seller = User.objects.get(pk=pk).groups.filter(name='Sellers').exists()
+        context = {'user': user,
+                    'posts': posts,
+                    'is_seller': is_seller,
+                    'products': products,
+                    'product_images': product_images,
+                    'received_reviews': received_reviews,
+                    }
+        return render(request, 'feed/view_user_page.html', context)
+    else:
+        return redirect('follow:user_detail')
+

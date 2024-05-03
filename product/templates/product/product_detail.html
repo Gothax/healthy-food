@@ -2,28 +2,66 @@
 
 {% block content %}
 <style>
+    .container {
+        font-family: 'NanumSquareRound';
+    }
+    .product_img{
+        width : 900px;
+        margin : auto;
+        margin-top :30px;
+    }
+    .product_detail{
+        width : 900px;
+        margin : auto;
+    }
     .carousel-item img {
         object-fit: cover; /* 이미지를 컨테이너에 맞추되 비율을 유지 */
-        height: 500px; /* 컨테이너의 높이 설정 */
+        height: 700px; /* 컨테이너의 높이 설정 */
     }
     
     .carousel-status {
         font-family: 'Josefin Sans', sans-serif;
-        margin-top: 15px;
+        margin-top: 30px;
         font-size: 18px;
     }
     .carousel-item {
         transition: transform 1s ease, opacity 0.5s ease; 
       }
-    </style>
+    .name_price{
+        margin-bottom : 30px;
+    }
+    .price{
+        margin-bottom : 10px;
+        font-weight : 700;
+    }
+
+    .description{
+        display: flex;
+    }
     
-<div class="container mt-5">
+    .btn{
+        margin-bottom : 25px;
+    }
+    .seller{
+        display: inline-block;
+    }
+
+    .menu_info{
+        font-family: 'NanumSquareRound';
+        display: inline-block;
+        align-items:center;
+        text-align : center;
+        margin : 0 2px;
+    }
+    </style>
+
+<link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square-round.css" rel="stylesheet">
+    
+<div class="container mt-3">
     <form action="{% url 'cart:product_add' object.id %}" method="post">
-        {{ add_to_cart }}
         {% csrf_token %}
         <div class="row">
-
-            <div class="col-md-6 mb-3">
+            <div class="product_img">
                 <!-- 상품 이미지 슬라이더 -->
                 <div id="productImageCarousel" class="carousel slide" data-ride="carousel">
                     <div class="carousel-inner">
@@ -50,16 +88,37 @@
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="product_detail">
                 <!-- 상품 상세 정보 -->
-                <h2>{{ object.name }}</h2>
-                <p class="text-muted">{{ object.category.name }}</p>
-                <p>{{ object.description }}</p>
-                <p class="font-weight-bold">가격: {{ object.price }}원</p>
-                <p>판매자: {{ object.seller.username }}</p>
-                <p>특징: {{ object.specific }}</p>
+                <h4><span class="badge text-bg-primary mb-2">{{ object.category.name }}</span></h4>
+                <!-- 판매자 뱃지 클릭 시 판매자 프로필로 이동 -->
+                <div class="seller">
+                    <a href="{% url 'feed:view_user' pk=user.pk %}">
+                    <h4><span class="badge rounded-pill text-bg-info text-white">판매자: {{ object.seller.username }}</span></h4>
+                    </a>
+                </div>
+                <hr>
+                <div class="name_price">
+                    <span class="float-start" style="font-weight : 700; font-size: 2.8rem;">{{ object.name }}</span>
+                    <span class="float-end mt-4" style="font-size: 1.3rem; font-weight : bold;">가격: {{ object.price }}원</span> 
+                </div>
+                <br>
+                <br>
+                <hr>
+                <!-- 가격 밑 메뉴에 대한 정보제공 -->
+                <div class="menu_info">
+                    <span><button class="btn btn btn-outline-success" style="font-weight: 700"disabled>배송비 : 3000원</button></h4></span>
+                    <span><button class="btn btn btn-outline-success" style="font-weight: 700"disabled>냉장보관 하세요</button></h4></span>
+                    <span><button class="btn btn btn-outline-success" style="font-weight: 700"disabled>유기농 농산물</button></h4></span>
+                </div>
+                <div class="description">
+                    <p>{{ object.description }}</p>
+                </div>
 
-                <button type="submit" class="btn btn-primary mt-3">장바구니에 추가</button>
+                <p>설명: {{ object.specific }}</p>
+                {{ add_to_cart }}
+
+                <button  class="btn btn-primary mt-3">장바구니에 추가</button>
             </div>
         </div>
     </form>
@@ -82,4 +141,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+
 {% endblock %}

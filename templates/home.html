@@ -2,6 +2,10 @@
 {% load static %}
 {% block extra-style %}
 <style>
+    main{
+      font-family: 'NanumSquareRound';
+    }
+
     .bd-placeholder-img {
       font-size: 1.125rem;
       text-anchor: middle;
@@ -107,7 +111,7 @@
       <img src="{% static 'banner1.png' %}" class="d-flex w-75 m-auto" height="450px" alt="Image Caption">
       <div class="container">
         <div class="carousel-caption text-end">
-          <a class="btn btn-lg btn-info" style="margin-right : 20px; margin-bottom: 20px; color: white;" href="{% url 'product:product_list' %}">Go Market &nbsp;<img style="width : 9px;"src="{% static 'arrow.png' %}"></a>
+          <a class="btn btn-lg btn-info" style="margin-right : 20px; margin-bottom: 20px; color: white; font-weight : 600;" href="{% url 'product:product_list' %}">마켓 보러가기 &nbsp;<img style="width : 9px;"src="{% static 'arrow.png' %}"></a>
         </div>
       </div>
     </div>
@@ -115,7 +119,7 @@
       <img src="{% static 'banner_2.png' %}" class="d-flex w-75 m-auto text-white" height="450px" alt="Image Caption">      
       <div class="container">
         <div class="carousel-caption text-start">
-          <p><a class="btn btn-lg btn-success" href="{% url 'feed:index' %}"> See Story &nbsp;<img style="width : 9px;"src="{% static 'arrow.png' %}"></a></p>
+          <p><a class="btn btn-lg btn-success" style="font-weight : 600;"href="{% url 'feed:index' %}"> 농장 이야기 &nbsp;<img style="width : 9px;"src="{% static 'arrow.png' %}"></a></p>
         </div>
       </div>
     </div>
@@ -144,17 +148,17 @@
   <div class="row">
     <div class="col-lg-4" style="text-align:center;">
       <img src="{% static 'icon_1.png' %}" style= "width: 100px; height: auto" alt="Image Caption">
-      <h3 class="fw-normal">가장 소량씩, 가장 신선하게</h3>
+      <h2 class="fw-normal">가장 소량씩, 가장 신선하게</h2>
       <p>적은 양으로 부담없이 즐겨요.</p>
     </div><!-- /.col-lg-4 -->
     <div class="col-lg-4" style="text-align:center;">
       <img src="{% static 'icon_2.png' %}" style= "width: 100px; height: auto" alt="Image Caption">      
-      <h3 class="fw-normal">친환경 채소를 가장 저렴하게!</h3>
+      <h2 class="fw-normal">친환경 채소를 가장 저렴하게!</h2>
       <p>30% OFF, 합리적인 가격으로 만나요!</p>
     </div><!-- /.col-lg-4 -->
     <div class="col-lg-4" style="text-align:center;">
       <img src="{% static 'icon_3.png' %}" style= "width: 100px; height: auto" alt="Image Caption">      
-      <h3 class="fw-normal">환경에 한 발 나은 선택</h3>
+      <h2 class="fw-normal">환경에 한 발 나은 선택</h2>
       <p>환경에 더 가까운 생산과 소비를 지지해요.</p>
     </div><!-- /.col-lg-4 -->
   </div><!-- /.row -->

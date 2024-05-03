@@ -39,7 +39,6 @@ def check_duplicate(request):
     if field_type == 'email':
         is_taken = User.objects.filter(email=field_value).exists()
     elif field_type == 'nickname':
-        # 닉네임 중복 검사를 Profile 모델을 통해 수행
         is_taken = Profile.objects.filter(nickname=field_value).exists()
     else:
         is_taken = False

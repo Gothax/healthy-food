@@ -21,7 +21,11 @@
                             {{ item.product.description }}<br>
                             {{ item.quantity }}개<br>
                             개당 {{ item.product.price }}원<br>
-                            <button type="button" class="btn btn-primary mt-3" onclick="addProductInfoToSession('{{ item.product.id }}', '{{ item.product.seller.id }}')">리뷰 작성하기</button>
+                            {% if item.review %}
+                            <a href="{% url 'feed:post_detail' item.review.id %}" class="btn btn-secondary mt-3">리뷰 보러가기</a>
+                            {% else %}
+                                <button type="button" class="btn btn-primary mt-3" onclick="addProductInfoToSession('{{ item.product.id }}', '{{ item.product.seller.id }}', '{{ order.id }}')">리뷰 작성하기</button>
+                            {% endif %}
                         </li>
                         {% endfor %}
                     </ul>
@@ -33,9 +37,9 @@
     {% endfor %}
 </div>
 <script type="text/javascript">
-    function addProductInfoToSession(productId, sellerId) {
+    function addProductInfoToSession(productId, sellerId, orderId) {
         var addProductInfoToSessionURL = "{% url 'feed:add_product_info_to_session' %}";
-        var requestURL = addProductInfoToSessionURL + `?product_id=${productId}&seller_id=${sellerId}`;
+        var requestURL = `${addProductInfoToSessionURL}?product_id=${productId}&seller_id=${sellerId}&order_id=${orderId}`;
         fetch(requestURL, {
             method: 'GET', 
             credentials: 'include', // 쿠키 정보 포함

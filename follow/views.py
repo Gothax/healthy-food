@@ -1,21 +1,23 @@
-from django.shortcuts import render
+from django.db.models.query import QuerySet
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import get_user_model
-from django.http import HttpResponseRedirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from .models import Follow
 from django.contrib.auth.models import User
 from django.views import generic
 from product.models import Product
 from feed.models import Content
+from userprofile.models import Profile
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from config.forms import ProfileForm
 
 def index(request):
     User = get_user_model()
     users = User.objects.all()
     return render(request, 'follow/index.html', {'users': users})
 
-class UserDV(generic.DetailView):
+class UserLV(generic.ListView):
     model = User
     template_name = 'follow/user_detail.html'
 
@@ -23,23 +25,20 @@ class UserDV(generic.DetailView):
         context = super().get_context_data(**kwargs)
         # 사용자가 판매자 그룹에 속해있는지 확인
         context['is_seller'] = self.request.user.groups.filter(name='Sellers').exists()
-        context['posts'] = Content.objects.filter(user=self.request.user, content_type='post')
-        context['reviews'] = Content.objects.filter(user=self.request.user, content_type='review')
+        context['posts'] = Content.objects.filter(user=self.request.user)
+        context['userprofile'] = self.request.user.profile
         return context
 
+
+# 팔로우/언팔로우 처리
 @login_required
-def following(request):
-    if request.method == 'POST':
-        # 팔로우할 사람 선택
-        user_to_follow_id = request.POST.get('user_id')
-        user_to_follow = get_user_model().objects.get(pk=user_to_follow_id)
-        # 현재 유저
-        follower = request.user
-        # 이미 팔로우하고 있는지 확인
-        if not Follow.objects.filter(follower=follower, following=user_to_follow).exists():
-            Follow.objects.create(follower=follower, following=user_to_follow)
-        return HttpResponseRedirect(reverse('feed:view_user', kwargs={'pk': user_to_follow_id}))
-    
+def follow_unfollow(request, user_id):
+    other_user = get_object_or_404(get_user_model(), pk=user_id)
+    follow, created = Follow.objects.get_or_create(follower=request.user, following=other_user)
+    # 이미 팔로우되어 있다면, 기록을 삭제(언팔로우)
+    if not created:
+        follow.delete()
+    return redirect('feed:view_user', pk=user_id)
 
 class SellerProductLV(LoginRequiredMixin, UserPassesTestMixin, generic.ListView):
     model = Product
@@ -60,6 +59,45 @@ class SellerProductLV(LoginRequiredMixin, UserPassesTestMixin, generic.ListView)
         for product in context['products']:
             product_images[product.id] = product.images.first().image_url if product.images.exists() else None
         context['product_images'] = product_images
-        context['reviews'] = Content.objects.filter(seller=self.request.user, content_type='review')
+        context['received_reviews'] = Content.objects.filter(seller=self.request.user.id, content_type='review')
 
         return context
+    
+# def edit_profile(request):
+#     try:
+#         profile = request.user.profile
+#     except User.profile.RelatedObjectDoesNotExist:
+#         profile = None
+
+#     if request.method == 'POST':
+#         form = ProfileForm(request.POST, request.FILES, instance=profile)
+#         if form.is_valid():
+#             # form.save() 호출 시 user 인자를 전달
+#             new_profile = form.save(user=request.user)
+#             # 성공적으로 프로필이 저장되었다면 원하는 페이지로 리다이렉트
+#             return redirect('follow:user_detail')
+#     else:
+#         form = ProfileForm(instance=profile)
+
+#     return render(request, 'follow/edit_profile.html', {'form': form})
+
+def edit_profile(request):
+    try:
+        profile = request.user.profile
+    except User.profile.RelatedObjectDoesNotExist:
+        profile = None
+
+    if request.method == 'POST':
+        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if profile_form.is_valid():
+            # 사용자 모델 저장
+            new_profile = profile_form.save(user=request.user, commit=False) # User 모델과 Profile 모델 연결
+            new_profile.save()  # 프로필 모델 DB에 저장
+            return redirect('follow:user_detail')  # 가입 완료 페이지로 리다이렉트
+    else:
+        profile_form = ProfileForm(instance=profile)
+
+    context = {
+        'profile_form': profile_form,
+    }
+    return render(request, 'follow/edit_profile.html', context)

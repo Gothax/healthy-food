@@ -3,22 +3,4 @@
 
 {% block content %}
 
-Index 페이지(모든 유저 리스트)
-<br>
-{% for user in users %}
-<!-- 유저 리스트의 유저가 현재 로그인된 유저가 아니면 -->
-{% if user.id != request.user.id %}
-{{ user.username }}
-<form action="{% url 'follow:follow' %}" method="post">
-  {% csrf_token %}
-  <!-- 팔로우할 사용자의 ID를 hidden input으로 전달 -->
-  <input type="hidden" name="user_id" value="{{ user.id }}">
-  <input type="submit" value="팔로우">
-</form>
-{% endif %}
-{% endfor %}
-
-{% for user in users %}
-  <a href="{% url 'feed:view_user' user.id %}">{{ user.username }}</a>
-{% endfor %}
 {% endblock %}
