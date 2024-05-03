@@ -1,6 +1,5 @@
 from django import forms
-from .models import Content, FeedImage,Comment
-from django.forms import inlineformset_factory
+from .models import Content, Comment
 
 class ContentForm(forms.ModelForm):
     class Meta:

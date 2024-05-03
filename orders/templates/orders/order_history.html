@@ -21,6 +21,7 @@
                             {{ item.product.description }}<br>
                             {{ item.quantity }}개<br>
                             개당 {{ item.product.price }}원<br>
+                            <button type="button" class="btn btn-primary mt-3" onclick="addProductInfoToSession('{{ item.product.id }}', '{{ item.product.seller.id }}')">리뷰 작성하기</button>
                         </li>
                         {% endfor %}
                     </ul>
@@ -31,5 +32,20 @@
         </div>
     {% endfor %}
 </div>
-
+<script type="text/javascript">
+    function addProductInfoToSession(productId, sellerId) {
+        var addProductInfoToSessionURL = "{% url 'feed:add_product_info_to_session' %}";
+        var requestURL = addProductInfoToSessionURL + `?product_id=${productId}&seller_id=${sellerId}`;
+        fetch(requestURL, {
+            method: 'GET', 
+            credentials: 'include', // 쿠키 정보 포함
+        }).then((response) => {
+            if(response.ok) {
+                window.location.href = "{% url 'feed:review-create' %}";
+            } else {
+                alert("오류가 발생했습니다. 다시 시도해주세요.");
+            }
+        });
+    }
+</script>
 {% endblock %}
