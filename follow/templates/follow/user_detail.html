@@ -38,6 +38,7 @@
     }
 </style>
 
+
 <div class="container my-4">
   <div class="mb-3 hstack gap-5">
     <h2 class="">일반 계정</h2>
@@ -119,9 +120,16 @@
           </a>
         </div>
         {% empty %}
-        <div class="col-12">
-          <p>게시글이 없습니다.</p>
+        <div class="mt-5 gap-5 hstack posts-container">
+          {% for post in posts %}
+            {% include 'feed/post_card.html' %}
+          {% empty %}
+            <div class="col-12">
+              <p>게시글이 없습니다.</p>
+            </div>
+          {% endfor %}
         </div>
+        <div class="loading" style="display: none;">로딩 중...</div>
         {% endfor %}
       </div>
     </div>
