@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 
+#review
 app_name='product'
 urlpatterns = [
     path('', views.ProductListView.as_view(), name='product_list'),

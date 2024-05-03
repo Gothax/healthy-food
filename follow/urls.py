@@ -1,5 +1,6 @@
 from django.urls import path
 from follow.views import *
+#review
 
 app_name = 'follow'
 urlpatterns = [

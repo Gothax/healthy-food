@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from product.models import Product
+#review
 
 # Create your models here.
 class Content(models.Model):

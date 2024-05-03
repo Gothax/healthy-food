@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 from .views import like_content, post_delete
+#review
 
 app_name='feed'
 urlpatterns = [

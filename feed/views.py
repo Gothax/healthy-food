@@ -160,6 +160,7 @@ class ReviewCreateView(CreateView):
             return HttpResponseForbidden('구매한 상품만 리뷰할 수 있습니다.')
         
 
+#review
 
         
         # 폼 데이터 저장 전 미리 인스턴스를 만들지만, DB에는 아직 저장하지 않음

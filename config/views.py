@@ -5,7 +5,7 @@ from .forms import CustomUserCreationForm, ProfileForm
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from userprofile.models import Profile
-
+#review
 def index(request):
     return render(request, 'home.html')
 

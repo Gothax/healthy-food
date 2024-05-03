@@ -4,6 +4,7 @@ from django.conf import settings
 
 from product.models import Product
 
+#review
 class Cart(object):
     def __init__(self, request) -> None:
         self.session = request.session

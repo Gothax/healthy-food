@@ -4,7 +4,7 @@ from django.views.decorators.http import require_POST
 from product.models import Product
 from .forms import AddProductForm
 from .cart import Cart
-
+#review
 @require_POST
 def add(request, product_id):
     cart = Cart(request)

@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from .models import *
 from django.contrib.auth.decorators import login_required
 
-
+#review
 @login_required
 def create_order(request):
     # POST 요청인지 확인
