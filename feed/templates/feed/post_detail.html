@@ -6,7 +6,13 @@
 
 <style>
   /* ------------------------------- */
+.expand-button {
+  display: inline-block; /* 더보기 버튼을 표시하는 스타일 */
+}
 
+.collapse-button {
+  display: none; /* 접기 버튼을 숨기는 스타일 */
+}
 /* 스크롤 바 루트처럼 안보이게 하기 위해서 */
 .modal-content::-webkit-scrollbar {
   display: none; /* WebKit 브라우저(예: Chrome, Safari)의 스크롤바를 숨김 */
@@ -31,7 +37,11 @@
 .modal-content .dropdown-menu .dropdown-item i {
     margin-right: 5px;
 }
-
+/* 게시물 내용이 3줄 이상인 경우에만 더보기/접기 버튼 표시 */
+.post-body.collapsed {
+  max-height: 60px; /* 최대 높이 설정 */
+  overflow: hidden; /* 초과 내용 숨김 */
+}
 /* ------------------------------------------------------ */
   #comment-text {
     resize: none;
@@ -221,7 +231,7 @@
         <!-- 게시글 제목과 본문 -->
         <h2>{{ post.title }}</h2>
 
-        <p class="mt-3">{{ post.body_text|safe|linebreaksbr }}</p> <!-- 줄바꿈 허용 안됨. -->
+        <p class="mt-3">{{ post.body_text|safe|linebreaksbr }}</p>
         
         <!-- 좋아요 버튼 수정 -->
         <a href="#" class="no-underline like-button" data-post="{{ post.id }}">
@@ -244,8 +254,9 @@
         {% if request.user == post.user or request.user.is_staff %}
         <div class="edit-delete-buttons">
           <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-            </button>            
+            <button class="btn btn-white dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+            </button>
+                      
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
               <li><a class="dropdown-item" href="{% url 'feed:post_edit' post.pk %}">수정</a></li>
               <li>
@@ -273,8 +284,12 @@
                 <div class="card-body">
                     <h2><a href="{% url 'feed:view_user' post.user.id %}">{{ post.user.username }}</a></h2>
                     <h2>{{ post.title }}</h2>
-                    <p class="mt-3 post-body collapsed">{{ post.body_text|safe|linebreaksbr }}</p> <!-- 수정 줄바꿈 허용안됨.-->
-
+                    <p class="mt-3 post-body collapsed">{{ post.body_text|safe|linebreaksbr }}</p>
+                  
+                    <!-- 게시물 내용의 더보기 버튼 (아이콘: ▾) -->
+                    <button class="btn btn-sm btn-secondary expand-button">&#x25BE;</button>
+                    <!-- 게시물 내용의 접기 버튼 (초기에는 숨겨둠, 아이콘: ▴) -->
+                    <button class="btn btn-sm btn-secondary collapse-button" style="display: none;">&#x25B4;</button>
                                         
 
                     {% if post.content_type == 'review' and post.product %}
@@ -585,10 +600,51 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
 </script>
-<!-- 게시물 3중이상 더보기/접기 삭제 -->
+<!-- 게시물 3중이상 더보기/접기 -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // 게시글 내용 요소
+      var postBody = document.querySelector('.post-body');
+      // 게시글 내용의 높이
+      var postBodyHeight = postBody.clientHeight;
+      // 기본 최대 높이 (3줄로 설정)
+      var maxHeight = 60;
 
-  
+      // 게시글 내용이 최대 높이보다 클 경우 더보기 버튼 표시
+      if (postBodyHeight > maxHeight) {
+          // 최대 높이 설정
+          postBody.style.maxHeight = maxHeight + 'px';
+          // 더보기 버튼 표시
+          document.querySelector('.expand-button').style.display = 'block';
+      }
 
+      // 더보기/접기 버튼 클릭 이벤트 처리
+      var expandButton = document.querySelector('.expand-button');
+      var collapseButton = document.querySelector('.collapse-button');
+
+      expandButton.addEventListener('click', function() {
+          // 최대 높이 해제
+          postBody.style.maxHeight = 'none';
+          // 더보기 버튼 아이콘 변경
+          expandButton.innerHTML = '&#x25B4;'; // ▴ 아이콘
+          // 더보기 버튼 숨김
+          expandButton.style.display = 'none';
+          // 접기 버튼 표시
+          collapseButton.style.display = 'block';
+      });
+
+      collapseButton.addEventListener('click', function() {
+          // 최대 높이 재설정
+          postBody.style.maxHeight = maxHeight + 'px';
+          // 더보기 버튼 아이콘 변경
+          expandButton.innerHTML = '&#x25BE;'; // ▾ 아이콘
+          // 접기 버튼 숨김
+          collapseButton.style.display = 'none';
+          // 더보기 버튼 표시
+          expandButton.style.display = 'block';
+      });
+  });
+</script>
 
   
 
