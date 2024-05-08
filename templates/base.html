@@ -77,7 +77,7 @@
                     <img id="user-profile-image" src="{% if request.user.userprofile.user_image %}{{ request.user.userprofile.user_image.url }}
                       {% else %}{% static 'default_profile_image.png' %} 
                       {% endif %}" style="width: 32px; height: 32px;" class="rounded-circle">                      
-                    <i class="fas fa-user-circle"></i>&nbsp;{% firstof request.user.get_short_name request.user.get_username %}
+                    &nbsp;{% firstof request.user.get_short_name request.user.get_username %}
                     </a>
                   <ul class="dropdown-menu" aria-labelledby="navbarUserDropdown">
                     <li><a class="dropdown-item" href="{% url 'follow:user_detail' %}">My Page</a></li>
