@@ -77,11 +77,11 @@ import base64
 @login_required
 def sales_settlement(request):
     # Order 모델에서 created_at 필드를 기준으로 월별로 그룹화하고, 각 그룹의 총 주문 금액을 계산
-    monthly_orders = Order.objects.filter(user=request.user).annotate(
-        month=TruncMonth('created_at')
+    monthly_orders = OrderItem.objects.filter(product__seller=request.user).select_related('order', 'product').annotate(
+        month=TruncMonth('order__created_at')
     ).values('month').annotate(
         total_sales=Count('id'),
-        total_price=Sum(F('order_items__quantity') * F('order_items__product__price'))
+        total_price=Sum(F('quantity') * F('product__price'))
     ).order_by('month')
 
     # 누적 매출액 계산
