@@ -9,7 +9,7 @@ from product.models import Product
 from feed.models import Content
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from config.forms import ProfileForm
-from django.http import HttpResponseForbidden
+
 
 def index(request):
     User = get_user_model()
@@ -96,3 +96,4 @@ def deactivate_user(request, user_id):
         user.save()
         logout(request)
         return redirect('index')
+    

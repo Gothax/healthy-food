@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from itertools import groupby
 from operator import attrgetter
 from cart.cart import Cart
+from django.db.models import Sum, F, Count
+from django.db.models.functions import TruncMonth
 
 @login_required
 def create_order(request):
@@ -66,6 +68,76 @@ def sales_history(request):
         groups_with_total.append((group, total_price))
     return render(request, 'orders/sales_history.html', {'groups_with_total': groups_with_total})
 
+from django.core.serializers.json import DjangoJSONEncoder
+from django.utils.safestring import mark_safe
+import json
+import matplotlib.pyplot as plt
+from io import BytesIO
+import base64
+@login_required
+def sales_settlement(request):
+    # Order 모델에서 created_at 필드를 기준으로 월별로 그룹화하고, 각 그룹의 총 주문 금액을 계산
+    monthly_orders = Order.objects.filter(user=request.user).annotate(
+        month=TruncMonth('created_at')
+    ).values('month').annotate(
+        total_sales=Count('id'),
+        total_price=Sum(F('order_items__quantity') * F('order_items__product__price'))
+    ).order_by('month')
+
+    # 누적 매출액 계산
+    cumulative_total_price = 0
+    for order in monthly_orders:
+        cumulative_total_price += order['total_price']
+
+
+    # ApexCharts 이용해 그래프 그리기(쿼리셋을 json 형태로 반환) ***페이지에 출력 안됨 
+    # # monthly_orders QuerySet을 JSON으로 직렬화
+    # monthly_orders_json = json.dumps(list(monthly_orders), cls=DjangoJSONEncoder)
+    # # XSS 공격 방지를 위해 mark_safe 사용
+    # monthly_orders_json_safe = mark_safe(monthly_orders_json)
+
+    # matplot 이용해 라인바 차트 이미지 생성하여 html에 전달   ***새로고침 하면 RuntimeError 발생
+    # # 월별 매출과 누적 매출을 계산합니다.
+    # months = [order['month'].strftime("%Y-%m") for order in monthly_orders]
+    # monthly_sales = [order['total_price'] for order in monthly_orders]
+    # cumulative_sales = [sum(monthly_sales[:i+1]) for i in range(len(monthly_sales))]
+    
+    # # Matplotlib을 사용하여 바 차트와 라인 차트를 하나의 그래프에 그립니다.
+    # fig, ax1 = plt.subplots()
+    
+    # # 월별 매출 바 차트
+    # ax1.bar(months, monthly_sales, color='b', label='Monthly Sales')
+    # ax1.set_xlabel('Month')
+    # ax1.set_ylabel('Monthly Sales')
+    # ax1.tick_params('y')
+    
+    # # 누적 매출 라인 차트
+    # ax2 = ax1.twinx()
+    # ax2.plot(months, cumulative_sales, color='r', label='Cumulative Sales')
+    # ax2.set_ylabel('Cumulative Sales', color='r')
+    # ax2.tick_params('y')
+    
+    # fig.tight_layout()
+    # plt.xticks(rotation=45)
+    # plt.legend()
+    
+    # # 그래프를 이미지로 변환합니다.
+    # buffer = BytesIO()
+    # plt.savefig(buffer, format='png')
+    # plt.close(fig)
+    # buffer.seek(0)
+    # image_png = buffer.getvalue()
+    # graph = base64.b64encode(image_png)
+    # graph = graph.decode('utf-8')
+    # buffer.close()
+
+    context = {
+        'monthly_orders': monthly_orders,
+        'cumulative_total_price': cumulative_total_price,
+        # 'graph': graph,
+        # 'monthly_orders_json': monthly_orders_json_safe,
+    }
+    return render(request, "orders/sales_settlement.html", context)
 
 @login_required
 def order_detail(request, order_id):

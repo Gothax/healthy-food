@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<div class="container justify-content-center mb-5">
+  <h2 class="">매출 결산</h2>
+<br>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th scope="col">연도</th>
+        <th scope="col">매출총액</th>
+      </tr>
+    </thead>
+    <tbody class="table-group-divider">
+      <tr>
+        <th scope="row">{{monthly_orders.0.month|date:"Y년"}}</th>
+        <td>{{cumulative_total_price}}</td>
+      </tr>
+    </table>
+    
+  <!-- matplot 그래프 이미지 표시 -->
+  <!-- <h4>3. 월별 누적액 그래프</h4>
+  <img src="data:image/png;base64,{{ graph }}" alt="Sales Graph" style="width: 600px;"> -->
+  
+  <!--ApexChart 그래프-->
+  <!-- Django 템플릿 내부 -->
+  <!-- {{ monthly_orders_json|json_script:"monthlyOrdersData" }} -->
+  <!-- <div id="chart">
+  </div>
+  <script>
+  var monthlyOrders = JSON.parse(document.getElementById('monthlyOrdersData').textContent);
+  // 월별 매출 데이터와 누적 금액 데이터를 초기화합니다.
+  var totalSalesData = [];
+  var cumulativeSalesData = [];
+  var labels = [];
+  var cumulativeSum = 0;
+
+  // 월별 매출 데이터를 순회하면서 각 데이터를 처리합니다.
+  monthlyOrders.forEach(function(order) {
+      var month = new Date(order.month).toLocaleDateString('ko-KR', { month: 'short', year: 'numeric' });
+      labels.push(month); // 라벨 배열에 월 정보를 추가합니다.
+      totalSalesData.push(order.total_price); // 월별 매출 데이터를 추가합니다.
+      
+      // 누적 금액을 계산하여 배열에 추가합니다.
+      cumulativeSum += order.total_price;
+      cumulativeSalesData.push(cumulativeSum);
+  });
+
+  var options = {
+            series: [{
+            name: 'Website Blog',
+            type: 'column',
+            data: totalSalesData
+          }, {
+            name: 'Social Media',
+            type: 'line',
+            data: cumulativeSalesData
+          }],
+            chart: {
+            height: 350,
+            type: 'line',
+          },
+          stroke: {
+            width: [0, 4]
+          },
+          title: {
+            text: '월별 매출 및 누적 매출'
+          },
+          dataLabels: {
+            enabled: true,
+            enabledOnSeries: [1]
+          },
+          labels: labels,
+          yaxis: [{
+            title: {
+              text: '누적 매출',
+            },
+          }, {
+            opposite: true,
+            title: {
+              text: '월별 매출'
+            }
+          }]
+          };
+
+          var chart = new ApexCharts(document.querySelector("#chart"), options);
+          chart.render();
+  </script> -->
+<br>
+  <h5>월별 현황</h5>
+  <!--테이블-->
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">구분</th>
+        <th scope="col">판매 건수</th>
+        <th scope="col">판매 총액</th>
+      </tr>
+    </thead>
+    <tbody class="table-group-divider">
+      {% for order in monthly_orders %}
+      <tr>
+        <th scope="row">{{ order.month|date:"m월" }}</th>
+        <td>{{ order.total_sales }}</td>
+        <td>{{ order.total_price }}</td>
+      </tr>
+      {% endfor %}
+
+    </tbody>
+  </table>
+</div>
+{% endblock %}

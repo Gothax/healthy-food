@@ -8,14 +8,16 @@ from orders.models import OrderItem
 from .forms import ContentForm, CommentForm
 from django.urls import reverse_lazy
 from django.urls import reverse
+from django.utils.html import escape
 from django.db.models import Count
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.views.decorators.http import require_GET
 from django.core.exceptions import PermissionDenied
-
 from django.contrib import messages
+from django.core.paginator import PageNotAnInteger, EmptyPage
+from django.template.loader import render_to_string
 
 def post_edit(request, pk):
     post = get_object_or_404(Content, pk=pk)
@@ -30,11 +32,17 @@ def post_edit(request, pk):
         form = ContentForm(request.POST, request.FILES, instance=post)
         # 폼이 유효할 경우
         if form.is_valid():
-            # 폼을 저장
-            form.save()
-            # 'feed:post_detail'로 리다이렉트, pk는 게시글의 pk
-            return redirect('feed:post_detail', pk=post.pk)
-    # GET 요청을 처리하는 경우
+            saved_post = form.save()  # 폼 데이터 저장
+
+            # 이미지 처리 로직 추가
+            images = request.FILES.getlist('images')  # images는 템플릿에서 이미지 파일 <input> 태그의 name 속성값입니다.
+            if images:
+                FeedImage.objects.filter(content=saved_post).delete()  # 기존 이미지 삭제
+                for image in images:
+                    FeedImage.objects.create(content=saved_post, image=image)  # 새 이미지 저장
+
+            messages.success(request, "게시글이 성공적으로 수정되었습니다.")
+            return redirect('feed:post_detail', pk=saved_post.pk)
     else:
         # 게시글 인스턴스를 포함한 폼을 생성
         form = ContentForm(instance=post)
@@ -78,7 +86,32 @@ class ContentListView(ListView):
     model = Content
     template_name = "feed/post_all.html"
     context_object_name = 'posts'
-    paginate_by = 8
+    paginate_by = 16
+
+    def get_queryset(self):
+        # 'created_at' 필드를 기준으로 역순으로 정렬합니다. 실제 필드명에 맞게 변경해 주세요.
+        return Content.objects.all().order_by('-created_at')
+
+    def get(self, request, *args, **kwargs):
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            self.object_list = self.get_queryset()
+            page = request.GET.get('page', 1)
+            paginator = self.get_paginator(self.object_list, self.paginate_by)
+
+            try:
+                posts = paginator.page(int(page))
+            except PageNotAnInteger:
+                posts = paginator.page(1)
+            except EmptyPage:
+                posts = []
+
+            post_data = []
+            for post in posts:
+                post_data.append(render_to_string('feed/post_card.html', {'post': post}, request=request))
+
+            return JsonResponse({'posts': post_data}, safe=False)
+
+        return super().get(request, *args, **kwargs)
     
 @require_GET
 def user_search(request):
@@ -207,12 +240,25 @@ class ReviewCreateView(CreateView):
         del self.request.session['order_id']
         return super().form_valid(form)
     
-
-
+# 본문 전체를 탐색하고 @user 를 link로 반환 -> 최적화 필요
+# detail view에서 본문을 출력하는 부분에 사용
+def convert_usernames_to_links(text):
+    words = escape(text).split()
+    for i, word in enumerate(words):
+        if word.startswith('@'):
+            username = word[1:]
+            profile = Profile.objects.filter(nickname=username).first()
+            if profile:
+                user_url = reverse('feed:view_user', kwargs={'pk': profile.user.pk})
+                words[i] = f'<a href="{user_url}">@{username}</a>'
+    return ' '.join(words)
 
 def post_detail(request, pk):
     post = get_object_or_404(Content, pk=pk)
     commentform = CommentForm()  
+    
+    # 본문에 태그된 user에 링크를 걸어줌
+    post.body_text = convert_usernames_to_links(post.body_text)
 
     # 댓글을 좋아요 개수를 기준으로 정렬하여 가져옴
     comments = post.comment_set.annotate(num_likes=Count('likes')).order_by('-num_likes')
@@ -242,21 +288,17 @@ def comments_create(request, pk):
             comment.content = content  
             comment.save() 
             return redirect('feed:post_detail', pk=pk) 
+            
     else:
         return redirect(reverse('login')) # 로그인안하면 로그인창으로
 
 # 댓글삭제 
 def comments_delete(request, pk):
-    if request.method == 'DELETE':
-        # 댓글 삭제 로직 구현
-        try:
-            comment = Comment.objects.get(pk=pk)
-            comment.delete()
-            return JsonResponse({'message': '댓글이 성공적으로 삭제되었습니다.'}, status=200)
-        except Comment.DoesNotExist:
-            return JsonResponse({'error': '해당 댓글을 찾을 수 없습니다.'}, status=404)
-    else:
-        return JsonResponse({'error': '잘못된 요청입니다.'}, status=405)
+    comment = get_object_or_404(Comment, pk=pk)
+    if request.method == 'POST':
+        comment.delete()
+
+    return redirect('feed:post_detail', pk=comment.content.pk)
 
 
 def view_user(request, pk):
@@ -270,12 +312,14 @@ def view_user(request, pk):
             received_reviews = Content.objects.filter(seller=pk, content_type='review')
             posts = Content.objects.filter(user=pk)
             is_seller = User.objects.get(pk=pk).groups.filter(name='Sellers').exists()
+            userprofile = user.profile
             context = {'user': user,
                         'posts': posts,
                         'is_seller': is_seller,
                         'products': products,
                         'product_images': product_images,
                         'received_reviews': received_reviews,
+                        'userprofile': userprofile,
                         }
             return render(request, 'feed/view_user_page.html', context)
         else:

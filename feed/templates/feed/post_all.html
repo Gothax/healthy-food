@@ -1,77 +1,27 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra-style %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/infinite_scroll.js' %}"></script>
+{% endblock %}
 
 {% block content %}
-<style>
-    .product-card {
-        transition: transform .2s;
-        /* 애니메이션 효과 */
-        cursor: pointer;
-    }
-
-    .product-card:hover {
-        transform: scale(1.05);
-        /* 마우스 오버시 카드 확대 */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, .1);
-        /* 그림자 효과 */
-    }
-
-    .custom-link {
-        display: block;
-        width: 100%;
-        /* 혹은 필요에 따라 조절할 수 있습니다. */
-        height: 100%;
-        /* `<a>` 태그의 크기를 강제로 조절할 필요가 있다면 이를 추가하세요. */
-    }
-</style>
-
 <div class="container mt-5">
     <div class="row mt-5 gx-2">
-        {% for post in posts %}
-        <div class="col-sm-3 mb-5">
-            <div class="card product-card" style="width: 18rem; height: 20rem;">
-                <a href="{% url 'feed:post_detail' post.id %}" class="text-dark text-decoration-none custom-link">
-                    {% with post.feed_images.all|first as image %}
-                    {% if image %}
-                    <!-- 이미지 크기 조정과 cover 효과 적용 -->
-                    <div style="height: 50%; overflow: hidden;">
-                        <img src="{{ image.image.url }}" class="card-img-top" alt="..."
-                            style="height: 100%; width: 100%; object-fit: cover;">
-                    </div>
-                    {% else %}
-                    <!-- 기본 이미지 또는 "이미지 없음" 표시 -->
-                    <div style="height: 50%; overflow: hidden;">
-                        <img src="https://placehold.co/300x200" class="card-img-top" alt="기본 이미지">
-                    </div>
-                    {% endif %}
-                    {% endwith %}
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">{{ post.title }}</h5>
-                        <small>{{ post.created_at|date:"Y-m-d H:i" }}</small>
-                        <p class="card-text mt-auto">{{ post.body_text|truncatewords:20 }}</p>
-                    </div>
-                </a>
-            </div>
-        </div>
-        {% empty %}
-        <div class="col-12">
-            <p>게시글이 없습니다.</p>
-        </div>
-        {% endfor %}
-    </div>
+    <div class="col-md-12 mx-auto">
 
-    <!-- 페이지네이션 -->
-    <div class="mt-3">
-        {% if posts.has_previous %}
-        <a href="?page=1" class="btn btn-outline-primary">처음으로</a>
-        <a href="?page={{ posts.previous_page_number }}" class="btn btn-outline-primary">&laquo; 이전</a>
-        {% endif %}
-        <span class="current">
-            페이지 {{ posts.number }} / {{ posts.paginator.num_pages }}
-        </span>
-        {% if posts.has_next %}
-        <a href="?page={{ posts.next_page_number }}" class="btn btn-outline-primary">다음 &raquo;</a>
-        <a href="?page={{ posts.paginator.num_pages }}" class="btn btn-outline-primary">끝으로</a>
-        {% endif %}
+
+        <div class="row posts-container">
+            {% for post in posts %}
+                {% include "feed/post_card.html" %}
+            {% empty %}
+            {% endfor %}
+        </div>
+
+        <div class="loading text-center" style="display: none;">로딩 중...</div>
+    </div>
     </div>
 </div>
 {% endblock %}

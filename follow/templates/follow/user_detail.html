@@ -59,18 +59,17 @@
 
     <div>
       <div class="hstack gap-1 my-3">
-      <h3><strong>{{ userprofile.nickname }}</strong></h3>
+      <h3><strong>{{ userprofile.nickname }}</strong></h3> 
       <div class="edit-profile">
         <div class="dropdown">
-          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
-            aria-expanded="false">
+          <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
           </button>
           <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
             <li><a class="dropdown-item" href="{% url 'follow:edit_profile' %}">프로필 수정</a></li>
             <li>
               <!-- Button trigger modal -->
               <button type="button" class="btn btn-link dropdown-item text-dark text-decoration-none" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-                회원탈퇴
+                회원 비활성화
               </button>
             </li>
           </ul>

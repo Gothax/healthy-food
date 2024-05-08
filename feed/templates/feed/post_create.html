@@ -137,22 +137,21 @@
       </div>
     </div>
     </label>
-    <div>
-      <label for="title">제목:</label>
-      <input type="text" id="title" name="title" required>
+
+    <div class="mb-3">
+      <label for="title" class="form-label">제목:</label>
+      <input type="text" class="form-control" id="title" name="title" required>
     </div>
 
-    <div>
-      <label for="body_text">본문:</label>
-      <textarea name="body_text" id="bodyText" required></textarea>
-      
+    <div class="mb-3">
+      <label for="body_text" class="form-label">본문:</label>
+      <textarea class="form-control" name="body_text" id="bodyText" rows="3" required></textarea>
       <div id="userList" class="user-list"></div>
-
     </div>
 
     <button type="submit" class="btn btn-primary">저장</button>
     </form>
-</div>
+  </div>
 
 
   <script>

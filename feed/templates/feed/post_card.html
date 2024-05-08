@@ -1,0 +1,96 @@
+<div class="col-sm-3 mb-5">
+
+    <style>
+
+        .product-card {
+
+            transition: transform .2s; /* 애니메이션 효과 */
+
+            cursor: pointer;
+
+        }
+
+        .product-card:hover {
+
+            transform: scale(1.05); /* 마우스 오버시 카드 확대 */
+
+            box-shadow: 0 4px 8px rgba(0, 0, 0, .1); /* 그림자 효과 */
+
+        }
+
+        .custom-link {
+
+            display: block;
+
+            width: 100%; /* 혹은 필요에 따라 조절할 수 있습니다. */
+
+            height: 100%; /* `<a>` 태그의 크기를 강제로 조절할 필요가 있다면 이를 추가하세요. */
+
+        }
+
+    </style>
+
+
+
+
+    <!-- post_card.html -->
+
+    <div class="card product-card" style="width: 18rem; height: 20rem;">
+
+        <a href="{% url 'feed:post_detail' post.id %}" class="text-dark text-decoration-none custom-link">
+
+            {% with post.feed_images.all|first as image %}
+
+                {% if image %}
+
+                    <div style="height: 50%; overflow: hidden;">
+
+                        <img src="{{ image.image.url }}" class="card-img-top" alt="..." style="height: 100%; width: 100%; object-fit: cover;">
+
+                    </div>
+
+                {% else %}
+
+                    <div style="height: 50%; overflow: hidden;">
+
+                        <img src="https://placehold.co/300x200" class="card-img-top" alt="기본 이미지">
+
+                    </div>
+
+                {% endif %}
+
+            {% endwith %}
+
+            <div class="card-body d-flex flex-column">
+
+                <h5 class="card-title">{{ post.title }}</h5>
+
+                <small>{{ post.created_at|date:"Y-m-d H:i" }}</small>
+
+                <p class="card-text mt-auto">{{ post.body_text|truncatewords:20 }}</p>
+
+            </div>
+
+            {% if post.content_type == 'post' %}
+
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
+
+                    post <span class="visually-hidden">unread messages</span>
+
+                </span>
+
+            {% elif post.content_type == 'review' %}
+
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary">
+
+                    review <span class="visually-hidden">unread messages</span>
+
+                </span>
+
+            {% endif %}
+
+        </a>
+
+    </div>
+
+  </div>

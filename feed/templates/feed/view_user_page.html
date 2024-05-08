@@ -5,6 +5,22 @@
 
 {% block content %}
 <style>
+  .image-crop {
+    width: 10rem;
+    height: 10rem;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+  }
+
+  .image-crop img {
+    object-fit: cover;
+    width: 100%;
+    height: auto;
+    border-radius: 20px;
+  }
   .product-card {
     transition: transform .2s;
     /* 애니메이션 효과 */
@@ -20,32 +36,47 @@
 </style>
 
 <div class="container my-4">
+  
+<div class="mb-3 hstack gap-3">
+  {% if userprofile.user_image %}
+  <div class="image-crop">
+    <img src="{{userprofile.user_image.url}}" alt="{{userprofile.nickname}}">
+  </div>
+  {% else %}
+  <div class="image-crop">
+    <img src="{% static 'dummy.png' %}" alt="{{userprofile.nickname}}">
+  </div>
+  {% endif %}
 
-  <div class="hstack gap-2">
-    <h3><strong>{{ user }}</strong></h3>
+  <div>
+    <div class="hstack gap-1 my-3">
+    <h3><strong>{{ userprofile.nickname }}</strong></h3>
     {% if is_seller %}
     <img src="{% static 'checkmark.png' %}" style="width: 18px;">
     {% endif %}
-  </div>
-
-  <div class="mb-3 hstack gap-1">
-    <div class="p-1">팔로워: <span class="badge bg-secondary">{{ user.followers.count }}</span></div>
-    <div class="p-1">팔로잉: <span class="badge bg-secondary">{{ user.following.count }}</span></div>
-
-    <!-- 팔로우 기능 -->
-    {% if user.id != request.user.id %}
-    <form action="{% url 'follow:follow_unfollow' user.id %}" method="post">
-      {% csrf_token %}
-      <!-- 팔로우할 사용자의 ID를 hidden input으로 전달 -->
-      <input type="hidden" name="user_id" value="{{ user.id }}">
-      {% if request.user|is_following:user %}
-      <input type="submit" value="팔로우 취소" class="btn btn-outline-secondary active">
-      {% else %}
-      <input type="submit" value="팔로우" class="btn btn-outline-secondary">
+    </div>
+    <p>{{user}}</p>
+  
+    <div class="mb-3 hstack gap-1">
+      <div class="p-1">팔로워: <span class="badge bg-secondary">{{ user.followers.count }}</span></div>
+      <div class="p-1">팔로잉: <span class="badge bg-secondary">{{ user.following.count }}</span></div>
+  
+      <!-- 팔로우 기능 -->
+      {% if user.id != request.user.id %}
+      <form action="{% url 'follow:follow_unfollow' user.id %}" method="post">
+        {% csrf_token %}
+        <!-- 팔로우할 사용자의 ID를 hidden input으로 전달 -->
+        <input type="hidden" name="user_id" value="{{ user.id }}">
+        {% if request.user|is_following:user %}
+        <input type="submit" value="팔로우 취소" class="btn btn-outline-secondary active">
+        {% else %}
+        <input type="submit" value="팔로우" class="btn btn-outline-secondary">
+        {% endif %}
+      </form>
       {% endif %}
-    </form>
-    {% endif %}
+    </div>
   </div>
+</div>
 
   {% if is_seller %}
   <div class="mt-5 mb-3 hstack gap-5">

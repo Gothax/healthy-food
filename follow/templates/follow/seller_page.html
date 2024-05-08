@@ -31,7 +31,7 @@
         <form action="{% url 'follow:user_detail' %}">
 
             <!-- 팔로우할 사용자의 ID를 hidden input으로 전달 -->
-            <button type="submit" class="btn btn-light">일반 계정으로 이동</button>
+            <button type="submit" class="btn btn-outline-success">일반 계정으로 이동</button>
         </form>
         {% endif %}
     </div>
@@ -48,8 +48,10 @@
         <div class="p-1">팔로잉: <span class="badge bg-secondary">{{ user.following.count }}</span></div>
     </div>
 
-    <div><a href="{% url 'orders:sales_history' %}" class="btn btn-light">판매 내역</a></div>
-
+    <div class="hstack gap-1">
+        <div><a href="{% url 'orders:sales_history' %}" class="btn btn-outline-success">판매 내역</a></div>
+        <div><a href="{% url 'orders:sales_settlement' %}" class="btn btn-outline-success">매출 결산</a></div>
+    </div>
     <div class="mt-5 mb-3 hstack gap-5">
         <h4>내 상품</h4>
         <a href="{% url 'product:add_product' %}" class="btn btn-light">상품 등록</a>

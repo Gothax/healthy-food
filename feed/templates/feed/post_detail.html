@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -214,10 +215,23 @@
         
 
       <div class="card-body">
-        <!-- 아래 코드에서 post.user.id 를 post.user.pk 로 변경 -->
-        <h2><a href="{% url 'feed:view_user' pk=post.user.pk %}">{{ post.user.username }}</a></h2>
+          <!-- 유저 프로필 사진과 유저네임 -->
+          <div class="d-flex align-items-center">
+            {% if post.user.profile.user_image %}
+                <a href="{% url 'feed:view_user' pk=post.user.pk %}" class="me-2">
+                    <img src="{{ post.user.profile.user_image.url }}" class="rounded-circle" style="width: 40px; height: 40px;">
+                </a>
+            {% else %}
+                <a href="{% url 'feed:view_user' pk=post.user.pk %}" class="me-2">
+                    <img src="{% static 'default_profile_pic.png' %}" class="rounded-circle" style="width: 40px; height: 40px;">
+                </a>
+            {% endif %}
+            <h2><a href="{% url 'feed:view_user' pk=post.user.pk %}">{{ post.user.username }}</a></h2>
+        </div>
+        <!-- 게시글 제목과 본문 -->
         <h2>{{ post.title }}</h2>
-        <p class="mt-3">{{ post.body_text }}</p>
+
+        <p class="mt-3">{{ post.body_text|safe|linebreaksbr }}</p>
         
         <!-- 좋아요 버튼 수정 -->
         <a href="#" class="no-underline like-button" data-post="{{ post.id }}">
@@ -269,7 +283,8 @@
                 <div class="card-body">
                     <h2><a href="{% url 'feed:view_user' post.user.id %}">{{ post.user.username }}</a></h2>
                     <h2>{{ post.title }}</h2>
-                    <p class="mt-3 post-body collapsed">{{ post.body_text }}</p>
+                    <p class="mt-3">{{ post.body_text|safe|linebreaksbr }}</p>
+                  
                     <!-- 게시물 내용의 더보기 버튼 (아이콘: ▾) -->
                     <button class="btn btn-sm btn-secondary expand-button">&#x25BE;</button>
                     <!-- 게시물 내용의 접기 버튼 (초기에는 숨겨둠, 아이콘: ▴) -->
@@ -293,7 +308,7 @@
                 
             </div>
             <div class="modal-body">
-              <form id="comment-form" action="{% url 'feed:comments_create' post.id %}" method="post" onsubmit="return validateComment()">
+              <form id="comment-form" action="{% url 'feed:comments_create' post.id %}" method="post" onsubmit="submitComment(event)">
                 {% csrf_token %}
                 <textarea class="form-control" id="comment-text" name="comment_text" rows="3" placeholder="댓글을 입력하세요..."></textarea>
                 <button type="submit" class="btn btn-primary mt-3">작성</button>
@@ -310,7 +325,7 @@
       <div class="comment-header d-flex justify-content-between align-items-center">
           <div>
               <h6>{{ most_liked_comment.user.username }}</h6>
-              <p>{{ most_liked_comment.comment_text }}</p>
+              <p>{{ most_liked_comment.comment_text|linebreaksbr }}</p> <!-- 수정 줄바꿈 허용-->
               <div class="row align-items-center">
                   <div class="col-auto">
                       <button class="like-btn btn-primary" data-comment-id="{{ most_liked_comment.pk }}">
@@ -371,7 +386,7 @@
       <div class="comment-header d-flex justify-content-between align-items-center">
           <div>
               <h6>{{ comment.user.username }}</h6>
-              <p>{{ comment.comment_text }}</p>
+              <p>{{ comment.comment_text|linebreaksbr }}</p> <!-- 수정 줄바꿈 허용-->
               <div class="row align-items-center">
                   <div class="col-auto">
                       <button class="like-btn" data-comment-id="{{ comment.pk }}">
@@ -437,7 +452,7 @@
       <div class="comment-header d-flex justify-content-between align-items-center">
           <div>
               <h6>{{ most_liked_comment.user.username }}</h6>
-              <p>{{ most_liked_comment.comment_text }}</p>
+              <p>{{ most_liked_comment.comment_text|linebreaksbr }}</p> <!-- 수정 줄바꿈 허용-->
               <div class="row align-items-center">
                   <div class="col-auto">
                       <button class="like-btn btn-primary" data-comment-id="{{ most_liked_comment.pk }}">
@@ -630,12 +645,6 @@ document.addEventListener("DOMContentLoaded", function(){
   });
 </script>
 
-
-
-
-
-  
-  
   
 
     <!-- 수정,삭제 ...아이콘에 넣기 -->
@@ -669,4 +678,7 @@ document.addEventListener("DOMContentLoaded", function(){
   }
 </script>
 <!-- ---------------------------------------------------------------- -->
+
+
+
 {% endblock %}
