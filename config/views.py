@@ -5,7 +5,7 @@ from .forms import CustomUserCreationForm, ProfileForm
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from userprofile.models import Profile
-from product.models import Product
+from product.models import Product, ProductImage
 
 def index(request):
     products = Product.objects.all()
@@ -34,6 +34,8 @@ def register_user(request):
     }
     return render(request, 'registration/register.html', context)
 
+
+# 이메일과 닉네임 중복확인 체크
 def check_duplicate(request):
     field_type = request.GET.get('field_type')
     field_value = request.GET.get('field_value')
@@ -50,6 +52,8 @@ def check_duplicate(request):
     }
     return JsonResponse(data)
 
+
+# 유저프로필 이미지 로드
 def user_profile_image(request):
     if request.user.is_authenticated:
         user_profile = Profile.objects.get(user=request.user)

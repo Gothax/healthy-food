@@ -196,30 +196,27 @@
       </div>
 
         <!-- 제품 그룹 1 -->
-        <div class="carousel-item active">
-            <div class="row">
-                {% for product in products %}
-                    {% if forloop.counter0 >= 0 and forloop.counter0 < 4 %}  <!-- 4개의 제품을 한 그룹으로 설정 -->
-                        <div class="col-md-3 mb-4">
-                            <!-- 제품 카드 코드 -->
-                            <div class="card product-card">
-                                <a href="{% url 'product:product_detail' product.id %}" class="text-dark text-decoration-none">
-                                    {% if product.image %}
-                                        <img src="{{ product.image.url }}" class="card-img-top product-image" alt="{{ product.name }} 이미지">
-                                    {% else %}
-                                        <img src="https://placehold.co/300x200" class="card-img-top product-image" alt="기본 이미지">
-                                    {% endif %}
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ product.name }}</h5>
-                                        <p class="card-text">{{ product.description|truncatewords:2 }}</p>
-                                        <p class="card-text product-price">가격: {{ product.price }}원</p>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
+      <div class="carousel-item active">
+          <div class="row">
+            {% for product in products%}
+            <div class="col-md-3 mb-4">
+              <div class="card product-card">
+                    <a href="{% url 'product:product_detail' product.id %}" class="text-dark text-decoration-none">
+                          {% if product.images.all %}
+                          <img src="{{ product.images.first.image_url }}" class="card-img-top product-image" style="width: 300px; height: 200px;">
+                          {% else %}
+                              <img src="https://placehold.co/300x200" class="card-img-top product-image" alt="기본 이미지">
+                          {% endif %}
+                          <div class="card-body">
+                              <h5 class="card-title">{{ product.name }}</h5>
+                              <p class="card-text">{{ product.description|truncatewords:2 }}</p>
+                              <p class="card-text product-price">가격: {{ product.price }}원</p>
+                          </div>
+                    </a>
+                    </div>
+                </div>
+              {% endfor %}
+          </div>
         </div>
 
         <!-- 제품 그룹 2 -->
