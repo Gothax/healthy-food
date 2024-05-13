@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User, Group
 from userprofile.models import Profile
 from django.db import transaction
-from django.core.exceptions import ValidationError
+
 
 """
 여기에 정의된 form을 사용하면 email 필드 값이 email이 맞는지, 보안 등 이점이 있습니다
@@ -75,14 +75,7 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ('email', 'nickname', 'user_image', 'phone_number', 'address', 'detailed_address', 'is_seller')
-    
-    def clean_nickname(self):
-        nickname = self.cleaned_data['nickname']
-        # 닉네임에 공백이 있는지 확인
-        if ' ' in nickname:
-            raise ValidationError("닉네임에는 공백을 포함할 수 없습니다.")
-        return nickname
+        fields = ('nickname', 'user_image', 'phone_number', 'address', 'detailed_address', 'is_seller')
 
     def save(self, user=None, commit=True):  # user 인자 추가
       profile = super().save(commit=False)  # commit=False로 호출

@@ -18,6 +18,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.core.paginator import PageNotAnInteger, EmptyPage
 from django.template.loader import render_to_string
+import re
 
 def post_edit(request, pk):
     post = get_object_or_404(Content, pk=pk)
@@ -116,10 +117,7 @@ class ContentListView(ListView):
 @require_GET
 def user_search(request):
     query = request.GET.get('q', '')
-    if query:
-        # users = User.objects.filter(username__icontains=query)
-        # user_list = list(users.values('username'))
-       
+    if query:       
         users = Profile.objects.filter(nickname__icontains=query)
         user_list = list(users.values('nickname'))
         return JsonResponse(user_list, safe=False)
@@ -240,18 +238,26 @@ class ReviewCreateView(CreateView):
         del self.request.session['order_id']
         return super().form_valid(form)
     
-# 본문 전체를 탐색하고 @user 를 link로 반환 -> 최적화 필요
+# 본문 전체를 탐색하고 @user 를 link로 반환
 # detail view에서 본문을 출력하는 부분에 사용
 def convert_usernames_to_links(text):
-    words = escape(text).split()
-    for i, word in enumerate(words):
-        if word.startswith('@'):
-            username = word[1:]
-            profile = Profile.objects.filter(nickname=username).first()
-            if profile:
-                user_url = reverse('feed:view_user', kwargs={'pk': profile.user.pk})
-                words[i] = f'<a href="{user_url}">@{username}</a>'
-    return ' '.join(words)
+    escaped_text = escape(text)
+    usernames = re.findall(r'@\w+', escaped_text)
+    unique_usernames = set(username[1:] for username in usernames)  #@ 제거
+
+    # select_related로 이후에 db를 참조하지 않게 처리
+    profiles = Profile.objects.filter(nickname__in=unique_usernames).select_related('user')
+    # replace_username_with_link에서 사용할 딕셔너리 생성 
+    username_to_url = {profile.nickname: reverse('feed:view_user', kwargs={'pk': profile.user.pk}) for profile in profiles}
+
+    # 사용자 이름을 링크로 변환
+    def replace_username_with_link(match):
+        username = match.group(0)[1:]  #@ 제거
+        if username in username_to_url:
+            return f'<a href="{username_to_url[username]}">@{username}</a>'
+        return match.group(0)
+
+    return re.sub(r'@\w+', replace_username_with_link, escaped_text)
 
 def post_detail(request, pk):
     post = get_object_or_404(Content, pk=pk)

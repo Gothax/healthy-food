@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% load static %}
 
 
@@ -110,13 +111,13 @@
                 <h4><span class="badge text-bg-success mb-2">{{ object.category.name }}</span></h4>
                 <!-- 판매자 뱃지 클릭 시 판매자 프로필로 이동 -->
                 <div class="seller">
-                    <a href="{% url 'feed:view_user' pk=user.pk %}">
-                    <h4><span class="badge rounded-pill text-bg-info text-white">판매자: {{ object.seller.username }}</span></h4>
+                    <a href="{% url 'feed:view_user' pk=object.seller_id %}">
+                    <h4><span class="badge rounded-pill text-bg-info text-white">판매자: {{ object.seller.profile.nickname }}</span></h4>
                     </a>
                 </div>
                 <hr>
                 <div class="name_price">
-                    <span class="float-start" style="font-weight : 700; font-size: 2.8rem;">{{ object.name }}</span>
+                    <span class="float-start" style="font-weight : 700; font-size: 2.8rem;">{{ object.specific }}</span>
                     <span class="float-end mt-4" style="font-size: 1.3rem; font-weight : bold;">가격: {{ object.price }}원</span> 
                 </div>
                 <br>
@@ -129,7 +130,7 @@
                     <span><button class="btn btn btn-outline-success" style="font-weight: 700"disabled>유기농 농산물</button></h4></span>
                 </div>
                 <div class="description">
-                    <p>{{ object.description }}</p>
+                    <p>{{ object.description|linebreaksbr }}</p>
                 </div>
 
                 <p>설명: {{ object.specific }}</p>

@@ -9,6 +9,7 @@ __pycache__/
 
 media/feed_images/*
 media/user_images/*
+
 # Distribution / packaging
 .Python
 build/

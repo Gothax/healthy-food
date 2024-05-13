@@ -108,9 +108,3 @@ def product_detail(request, pk):
     }
     return render(request, 'product/product_detail.html', context,)
 
-# product_list.html에서 등록된 제품 목록 가져오기
-def load_product(request):
-    # DB에 저장된 모든 상품 데이터 가져오기
-    products = Product.objects.all()
-    return render(request, 'product/product_list.html', {'products': products})
-

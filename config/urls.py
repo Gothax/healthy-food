@@ -24,7 +24,6 @@ from product import views as product_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='index'),
-    path('', product_views.load_product, name='load_product'),
     # 로그인, 회원가입
     path('login/', views.login, name='login'),
     path('accounts/', include('django.contrib.auth.urls')),
