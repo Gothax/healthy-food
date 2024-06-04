@@ -79,7 +79,7 @@
     import { useUserStore } from '@/stores/user'
     import FeedForm from '@/components/FeedForm.vue';
     import ModalView from '@/components/ModalView.vue';
-import { RouterLink } from 'vue-router';
+    import { RouterLink } from 'vue-router';
 
     export default {
         setup() {

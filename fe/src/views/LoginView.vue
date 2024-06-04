@@ -89,7 +89,7 @@ export default {
                     .catch(error => {
                         console.log('error', error)
 
-                        this.errors.push('The email or password is incorrect! Or the user is not activated!')
+                        this.errors.push('email 이나 비밀번호가 일치하지 않습니다!')
                     })
                 
                     

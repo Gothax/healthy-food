@@ -14,4 +14,7 @@ urlpatterns = [
     
     path('follow/<uuid:pk>/request/', api.send_follow, name='send_follow'),
     path('follow/<uuid:pk>/status/', api.check_follow, name='check_follow'),
+    
+    path('seller/register/', api.register_seller, name='register_seller'),
 ]
+

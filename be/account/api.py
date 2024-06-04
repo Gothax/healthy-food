@@ -55,7 +55,7 @@ def send_follow(request, pk):
         return JsonResponse({'message': 'follow'})
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def check_follow(request, pk):
     me = request.user
@@ -98,3 +98,19 @@ def editpassword(request):
         return JsonResponse({'message': 'success'})
     else:
         return JsonResponse({'message': form.errors.as_json()}, safe=False)
+    
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def register_seller(request):
+    user = request.user
+    business_number = request.data.get('business_number')
+
+    if not business_number:
+        return JsonResponse({'message': 'Business number is required'}, status=400)
+
+    user.is_seller = True
+    user.business_number = business_number
+    user.save()
+
+    return JsonResponse({'message': 'You have been registered as a seller.'})
