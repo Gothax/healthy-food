@@ -1,7 +1,7 @@
 <template>
     <form v-on:submit.prevent="submitForm" method="post">
     <div class="p-4">  
-        <textarea v-model="body" class="p-4 w-full bg-gray-100 rounded-lg" placeholder="What are you thinking about?"></textarea>
+        <textarea v-model="body" class="p-4 w-full bg-gray-100 rounded-lg" placeholder="Body"></textarea>
 
         <div id="preview" v-if="urls.length">
             <img v-for="(url, index) in urls" :key="index" :src="url" class="w-[100px] mt-3 rounded-xl" />
@@ -19,6 +19,7 @@
 </template>
 
 <script>
+
 import axios from 'axios'
 
 export default {

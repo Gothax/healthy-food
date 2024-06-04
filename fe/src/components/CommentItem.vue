@@ -1,3 +1,4 @@
+<!-- CommentItem.vue -->
 <template>
     <div class="mb-6 flex items-center justify-between">
         <div class="flex items-center space-x-6">

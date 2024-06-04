@@ -1,3 +1,4 @@
+<!-- ModalView.vue -->
 <template>
     <div class="modal">
       <div class="overlay" @click="$emit('close-modal')"></div>
