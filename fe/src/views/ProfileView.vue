@@ -9,7 +9,7 @@
                     <span v-if="user.is_seller">✔️</span>
                 </p>
 
-                <template v-if="userStore.user.isAuthenticated && user.is_seller">
+                <template v-if="userStore.user.isAuthenticated && user.is_seller && userStore.user.id === user.id">
                         <div class="flex items-center space-x-4">
                             <div>
                                 <ModalView v-if="isModalViewed" @close-modal="isModalViewed = false">
