@@ -19,7 +19,6 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-
 class Like(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_by = models.ForeignKey(User, related_name='likes', on_delete=models.CASCADE)

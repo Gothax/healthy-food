@@ -36,7 +36,6 @@
         </div>
     </div>
     
-
     <swiper :navigation="true" :pagination="{ clickable: true }">
         <swiper-slide v-for="image in post.attachments" :key="image.id">
             <img :src="image.get_image" class="w-full mb-4 rounded-xl">

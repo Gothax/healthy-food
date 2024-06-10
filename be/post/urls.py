@@ -1,5 +1,6 @@
 from django.urls import path
 from . import api
+from .views import PostListView
 
 # config path('api/posts/', include('post.urls')),
 urlpatterns = [
@@ -18,5 +19,7 @@ urlpatterns = [
     path('<uuid:pk>/comment/', api.post_create_comment, name='post_create_comment'),
     
     path('trends/', api.get_trends, name='get_trends'),
+
+    path('api/posts/', PostListView.as_view(), name='post-list'),
     
 ]

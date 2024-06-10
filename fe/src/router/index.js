@@ -51,6 +51,11 @@ const router = createRouter({
       component: PostView
     },
     {
+      path: '/post/:id', // 포스트 상세 페이지 경로 설정
+      name: 'postview',
+      component: PostView
+    },
+    {
       path: '/trends/:id',
       name: 'trendview',
       component: TrendView
