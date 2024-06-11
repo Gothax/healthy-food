@@ -34,23 +34,35 @@ def search(request):
     data = request.data
     query = data['query']
     query_embedding = get_embedding(query)
-    print(query)
-    print(query_embedding)
     products = Product.objects.annotate(
         similarity=CosineDistance(F('embeddings'), query_embedding)
     ).order_by('similarity')[:10]
-    print(products)
 
-    users = User.objects.filter(name__icontains=query)
-    users_serializer = UserSerializer(users, many=True)
-
-    posts = Post.objects.filter(body__icontains=query)
+    posts = Post.objects.filter(product__in=products)
     posts_serializer = PostSerializer(posts, many=True)
-
     return JsonResponse({
-        'users': users_serializer.data,
         'posts': posts_serializer.data
     }, safe=False)
+    
+# @api_view(['POST'])
+# def search(request):
+#     data = request.data
+#     query = data['query']
+#     query_embedding = get_embedding(query)
+#     products = Product.objects.annotate(
+#         similarity=CosineDistance(F('embeddings'), query_embedding)
+#     ).order_by('similarity')[:10]
+
+#     users = User.objects.filter(name__icontains=query)
+#     users_serializer = UserSerializer(users, many=True)
+
+#     posts = products.posts
+#     posts_serializer = PostSerializer(posts, many=True)
+
+#     return JsonResponse({
+#         'users': users_serializer.data,
+#         'posts': posts_serializer.data
+#     }, safe=False)
     
     
 #최적화를 위해 추가해야할 설정    
@@ -81,3 +93,37 @@ def search(request):
 #     ]
 
 #     return JsonResponse({'products': products}, safe=False)
+
+
+# @api_view(['POST'])
+# def search(request):
+#     data = request.data
+#     query = data['query']
+#     query_embedding = get_embedding(query)
+#     print(query)
+#     print(query_embedding)
+    
+#     # Use raw SQL to leverage the HNSW index for efficient nearest neighbor search
+#     with connection.cursor() as cursor:
+#         cursor.execute("""
+#             SELECT id
+#             FROM post_product
+#             ORDER BY embeddings <=> %s
+#             LIMIT 10
+#         """, [query_embedding])
+#         product_ids = [row[0] for row in cursor.fetchall()]
+    
+#     products = Product.objects.filter(id__in=product_ids)
+#     print(products)
+
+#     users = User.objects.filter(name__icontains=query)
+#     users_serializer = UserSerializer(users, many=True)
+
+#     # products에 해당하는 posts를 추출
+#     posts = Post.objects.filter(product__in=products)
+#     posts_serializer = PostSerializer(posts, many=True)
+
+#     return JsonResponse({
+#         'users': users_serializer.data,
+#         'posts': posts_serializer.data
+#     }, safe=False)
