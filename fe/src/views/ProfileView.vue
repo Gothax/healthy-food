@@ -164,6 +164,7 @@
 import axios from 'axios'
 import Trends from '../components/Trends.vue'
 import { useUserStore } from '@/stores/user'
+import { useToastStore } from '@/stores/toast'
 import FeedListItem from '../components/FeedListItem.vue'
 import ModalView from '../components/ModalView.vue'
 import ProductForm from '../components/ProductForm.vue'
@@ -177,9 +178,11 @@ export default {
 
     setup() {
         const userStore = useUserStore()
+        const toastStore = useToastStore()
 
         return {
-            userStore
+            userStore,
+            toastStore
         }
     },
 
@@ -202,7 +205,6 @@ export default {
             isFollowing: false,
             isModalViewed: false,
             business_number: '',
-
         }
     },
     computed: {
@@ -230,17 +232,43 @@ export default {
 
     methods: {
         registerAsSeller() {
-            axios
-                .post(`/api/seller/register/`, {
-                    business_number: this.business_number
-                })
-                .then(response => {
-                    console.log('data', response.data)
-                    this.$router.go();
-                })
-                .catch(error => {
-                    console.log('error', error)
-                })
+
+            var data = {
+                "b_no": [ this.business_number ] // 사업자번호 "xxxxxxx" 로 조회 시,
+            }; 
+            const serviceKey = import.meta.env.VITE_APP_SERVICE_KEY
+            console.log(serviceKey);
+            $.ajax({
+                url: "https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=" + serviceKey,  // serviceKey 값을 xxxxxx에 입력
+                type: "POST",
+                data: JSON.stringify(data), // json 을 string으로 변환하여 전송
+                dataType: "JSON",
+                contentType: "application/json",
+                accept: "application/json",
+
+                success: (result) => {
+                    if (result.data[0].b_stt_cd === '01') {
+                        axios
+                            .post(`/api/seller/register/`, {
+                                business_number: this.business_number,
+                            })
+                            .then(response => {
+                                console.log('data', response.data)
+                                this.toastStore.showToast(3000, response.data.message, 'bg-emerald-500')
+                                setTimeout(() => {
+                                    this.$router.go();
+                                }, 3000);
+                            })
+                            .catch(error => {
+                                console.log('error', error)
+                            })
+                    }
+                },
+                error: (result) => {
+                    console.log(result.responseText); //responseText의 에러메세지 확인
+                }
+            });
+
         },
         
         deletePost(id) {
