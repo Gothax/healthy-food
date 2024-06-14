@@ -232,44 +232,30 @@ export default {
 
     methods: {
         registerAsSeller() {
+            const data = { "b_no": [this.business_number] };
+            const serviceKey = import.meta.env.VITE_APP_SERVICE_KEY;
 
-            var data = {
-                "b_no": [ this.business_number ] // 사업자번호 "xxxxxxx" 로 조회 시,
-            }; 
-            const serviceKey = import.meta.env.VITE_APP_SERVICE_KEY
-            console.log(serviceKey);
-            $.ajax({
-                url: "https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=" + serviceKey,  // serviceKey 값을 xxxxxx에 입력
-                type: "POST",
-                data: JSON.stringify(data), // json 을 string으로 변환하여 전송
-                dataType: "JSON",
-                contentType: "application/json",
-                accept: "application/json",
-
-                success: (result) => {
-                    if (result.data[0].b_stt_cd === '01') {
-                        axios
-                            .post(`/api/seller/register/`, {
-                                business_number: this.business_number,
-                            })
-                            .then(response => {
-                                console.log('data', response.data)
-                                this.toastStore.showToast(3000, response.data.message, 'bg-emerald-500')
-                                setTimeout(() => {
-                                    this.$router.go();
-                                }, 3000);
-                            })
-                            .catch(error => {
-                                console.log('error', error)
-                            })
-                    }
-                },
-                error: (result) => {
-                    console.log(result.responseText); //responseText의 에러메세지 확인
+            axios({
+                method: 'post',
+                url: `https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=${serviceKey}`,
+                data: data,
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(result => {
+                if (result.data.data[0].b_stt_cd === '01') {
+                return axios.post(`/api/seller/register/`, { business_number: this.business_number });
                 }
+                return Promise.reject(new Error('Invalid business number'));
+            })
+            .then(response => {
+                this.toastStore.showToast(3000, response.data.message, 'bg-emerald-500');
+                setTimeout(() => this.$router.go(), 3000);
+            })
+            .catch(error => {
+                console.log('error', error);
+                this.toastStore.showToast(3000, error.message, 'bg-red-500');
             });
-
-        },
+            },
         
         deletePost(id) {
             this.posts = this.posts.filter(post => post.id !== id)
