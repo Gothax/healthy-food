@@ -20,8 +20,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 # production시 여기 docker container or ip
-WEBSITE_URL = 'http://127.0.0.1:8000'
-
+WEBSITE_URL = 'http://be:8000'
 # Application definition
 
 
@@ -43,19 +42,18 @@ REST_FRAMEWORK = {
 }
 
 
-CORS_ALLOW_ALL_ORIGINS = True
 
 # production 단계에서 frontend container
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://127.0.0.1:5173",
-# ]
+CORS_ALLOW_ALL_ORIGINS = False
 
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://127.0.0.1:5173",
+CORS_ALLOWED_ORIGINS = [
+    "https://healthy-food-snowy.vercel.app",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://healthy-food-snowy.vercel.app",
+]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -114,12 +112,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': config('DATABASE_ENGINE'),
-        'NAME': config('DATABASE_NAME'),
-        'USER': config('DATABASE_USER'),
-        'PASSWORD': config('DATABASE_PASSWORD'),
-        'HOST': config('DATABASE_HOST'),
-        'PORT': config('DATABASE_PORT', default=''),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'healthy_food',
+        'USER': 'postgres',
+        'PASSWORD': 'password',
+        'HOST': 'db',
+        'PORT': '5432',
     }
 }
 
