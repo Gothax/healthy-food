@@ -16,8 +16,6 @@ services:
       context: ./be
     command: >
       bash -c "
-      chmod +x /wait-for-it.sh
-      /wait-for-it.sh db:5432 -t 10 &&
       python manage.py migrate &&
       gunicorn config.wsgi --bind 0.0.0.0:8000"
     ports:
