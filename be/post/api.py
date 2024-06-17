@@ -15,20 +15,27 @@ from django.db import transaction
 
 
 @api_view(['GET'])
-def post_list(request):
+def product_list(request):
     category_name = request.GET.get('category', 'all')
+    posts = Post.objects.filter(content_type="product")
     
-    if category_name == 'all':
-        posts = Post.objects.all()
-    else:
+    if category_name != 'all':
         category = get_object_or_404(Category, name=category_name)
-        posts = Post.objects.filter(product__category=category)
+        posts = posts.filter(product__category=category)
     
     trend = request.GET.get('trend', '')
     if trend:
         posts = posts.filter(body__icontains='#' + trend)
         
     serializer = PostSerializer(posts, many=True)
+    return JsonResponse(serializer.data, safe=False)
+
+
+@api_view(['GET'])
+def post_list(request):
+    posts = Post.objects.filter(content_type__in=['post', 'review'])
+    
+    serializer = PostDetailSerializer(posts, many=True)
     return JsonResponse(serializer.data, safe=False)
 
 
