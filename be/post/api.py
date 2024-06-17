@@ -12,17 +12,21 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from order.models import OrderItem
 import json
 from django.db import transaction
+from rest_framework.generics import ListAPIView
+from rest_framework.pagination import PageNumberPagination
+
+class PostListPagination(PageNumberPagination):
+    page_size = 3
 
 
 @api_view(['GET'])
-def post_list(request):
+def product_list(request):
     category_name = request.GET.get('category', 'all')
+    posts = Post.objects.filter(content_type="product")
     
-    if category_name == 'all':
-        posts = Post.objects.all()
-    else:
+    if category_name != 'all':
         category = get_object_or_404(Category, name=category_name)
-        posts = Post.objects.filter(product__category=category)
+        posts = posts.filter(product__category=category)
     
     trend = request.GET.get('trend', '')
     if trend:
@@ -30,6 +34,12 @@ def post_list(request):
         
     serializer = PostSerializer(posts, many=True)
     return JsonResponse(serializer.data, safe=False)
+
+
+class PostListView(ListAPIView):
+    queryset = Post.objects.filter(content_type__in=['post', 'review'])
+    serializer_class = PostDetailSerializer
+    pagination_class = PostListPagination
 
 
 @api_view(['GET'])
@@ -180,7 +190,7 @@ def post_like(request, pk):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def check_liked(request, pk):
-    post = Post.objects.get(pk=pk)    
+    post = Post.objects.get(pk=pk)
     me = request.user
     is_liked = Like.objects.filter(created_by=me, post=post).exists()
     return JsonResponse({'isLiked': is_liked})
