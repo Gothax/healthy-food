@@ -2,8 +2,7 @@
 	<div class="max-w-7xl mx-auto grid grid-cols-4 gap-4" ref="content">
 		<div class="main-center col-span-3 space-y-4">
 
-			<div v-for="post in posts" :key="post.id"
-				class="p-4 bg-white border border-gray-200 rounded-lg">
+			<div v-for="post in posts" :key="post.id" class="p-4 bg-white border border-gray-200 rounded-lg">
 				<FeedItem :post="post" />
 			</div>
 		</div>
@@ -30,25 +29,46 @@ export default {
 	data() {
 		return {
 			posts: [],
+			nextPageUrl: null,
+			isLoading: false,
 		}
 	},
 
 	mounted() {
-		this.getPost()
+		this.getPost(1)
+		window.addEventListener('scroll', this.handleScroll)
 	},
 
 	methods: {
-		getPost() {
-			axios
-				.get(`/api/posts/feed/`)
-				.then(response => {
-					console.log('data', response.data)
+		getPost(page) {
+			if (this.isLoading) return;
+			this.isLoading = true;
 
-					this.posts = response.data
+			const url = this.nextPageUrl || `/api/posts/feed/?page=${page}`;
+			axios
+				.get(url)
+				.then((response) => {
+					this.posts.push(...response.data.results);
+					this.nextPageUrl = response.data.next;
+					this.isLoading = false;
 				})
-				.catch(error => {
-					console.log('error', error)
-				})
+				.catch((error) => {
+					console.log('error', error);
+					this.isLoading = false;
+				});
+		},
+		handleScroll() {
+			const scrollHeight = document.documentElement.scrollHeight;
+			const scrollTop = document.documentElement.scrollTop;
+			const clientHeight = document.documentElement.clientHeight;
+
+			if (
+				scrollTop + clientHeight >= scrollHeight &&
+				this.nextPageUrl &&
+				!this.isLoading
+			) {
+				this.getPost();
+			}
 		},
 	}
 }
