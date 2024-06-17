@@ -51,6 +51,7 @@ export default {
 					this.posts.push(...response.data.results);
 					this.nextPageUrl = response.data.next;
 					this.isLoading = false;
+					console.log(this.posts)
 				})
 				.catch((error) => {
 					console.log('error', error);
@@ -63,7 +64,7 @@ export default {
 			const clientHeight = document.documentElement.clientHeight;
 
 			if (
-				scrollTop + clientHeight >= scrollHeight &&
+				Math.ceil(scrollTop + clientHeight) >= Math.floor(scrollHeight) &&
 				this.nextPageUrl &&
 				!this.isLoading
 			) {
