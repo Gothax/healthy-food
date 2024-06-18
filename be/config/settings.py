@@ -20,7 +20,7 @@ DEBUG = False
 ALLOWED_HOSTS = ['*']
 
 # production시 여기 docker container or ip
-WEBSITE_URL = 'http://be:8000'
+WEBSITE_URL = 'https://hfbe.ddnsking.com'
 # Application definition
 
 
