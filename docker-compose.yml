@@ -35,12 +35,13 @@ services:
       - 80:80
       - 443:443
     volumes:
-      - ./nginx/nginx-setup.conf:/etc/nginx/conf
+      - ./nginx/nginx-setup.conf:/etc/nginx/conf.d
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
     restart: always
     depends_on:
       - be
+      - certbot
 
   
   certbot:
