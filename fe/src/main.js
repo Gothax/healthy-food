@@ -10,7 +10,7 @@ import 'swiper/swiper-bundle.css';
 import './assets/main.css'
 
 // production 단계에서 여기
-axios.defaults.baseURL = 'https://hfbe.ddnsking.com'
+axios.defaults.baseURL = 'https://hfbetest.shop'
 
 const app = createApp(App)
 
