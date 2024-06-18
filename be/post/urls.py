@@ -3,7 +3,7 @@ from . import api
 
 # config path('api/posts/', include('post.urls')),
 urlpatterns = [
-    path('', api.product_list, name='product_list'),
+    path('', api.ProductListView.as_view(), name='product_list'),
     path('feed/', api.PostListView.as_view(), name='post_list'),
     path('profile/<uuid:id>/', api.post_list_profile, name='post_list_profile'),
     path('<uuid:pk>/', api.post_detail, name='post_detail'),

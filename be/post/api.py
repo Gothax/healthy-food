@@ -16,24 +16,27 @@ from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 
 class PostListPagination(PageNumberPagination):
-    page_size = 3
+    page_size = 6
 
 
-@api_view(['GET'])
-def product_list(request):
-    category_name = request.GET.get('category', 'all')
-    posts = Post.objects.filter(content_type="product")
-    
-    if category_name != 'all':
-        category = get_object_or_404(Category, name=category_name)
-        posts = posts.filter(product__category=category)
-    
-    trend = request.GET.get('trend', '')
-    if trend:
-        posts = posts.filter(body__icontains='#' + trend)
-        
-    serializer = PostSerializer(posts, many=True)
-    return JsonResponse(serializer.data, safe=False)
+class ProductListView(ListAPIView):
+    queryset = Post.objects.filter(content_type="product")
+    serializer_class = PostSerializer
+    pagination_class = PostListPagination
+
+    def get_queryset(self):
+        queryset = self.queryset
+        category_name = self.request.query_params.get('category', 'all')
+        trend = self.request.query_params.get('trend', '')
+
+        if category_name != 'all':
+            category = get_object_or_404(Category, name=category_name)
+            queryset = queryset.filter(product__category=category)
+
+        if trend:
+            queryset = queryset.filter(body__icontains='#' + trend)
+
+        return queryset
 
 
 class PostListView(ListAPIView):

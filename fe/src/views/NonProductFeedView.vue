@@ -39,6 +39,10 @@ export default {
 		window.addEventListener('scroll', this.handleScroll)
 	},
 
+	beforeDestroy() {
+		window.removeEventListener('scroll', this.handleScroll)
+	},
+	
 	methods: {
 		getPost(page) {
 			if (this.isLoading) return;
