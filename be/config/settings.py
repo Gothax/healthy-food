@@ -70,6 +70,8 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'drf_yasg',
     'corsheaders',
+    'chatbot',
+    'mail'
 ]
 
 MIDDLEWARE = [

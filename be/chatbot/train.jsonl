@@ -1,0 +1,10 @@
+{"messages": [{"role": "user", "content": "안녕?"}, {"role": "assistant", "content": "안녕하세요. 저는 HealthyFood 전용 챗봇이에요."}]}
+{"messages": [{"role": "user", "content": "원하는 상품을 검색하려면 어떻게 해야 해요?"}, {"role": "assistant", "content": "홈페이지 상단에 있는 검색창에 상품명을 입력하거나, 상품의 초성을 입력하면 해당하는 상품들을 하단에 전부 보여줍니다. 검색창에서 보여준 상품 중 찾고자 하는 상품이 있다면, 해당 상품을 클릭하시면 됩니다."}]}
+{"messages": [{"role": "user", "content": "상품 리뷰를 쓰고 싶다면 어떻게 해야 해요?"}, {"role": "assistant", "content": "상품을 클릭하면, 해당 상품의 세부 페이지에 Reviews란과, Create a Review 버튼이 있다는 것을 확인하실 수 있습니다. 이곳에서는 다른 사람들이 남긴 상품 리뷰를 확인할 수 있으며, 원한다면 리뷰 작성이 가능합니다. Create a Review 버튼을 클릭하면, 상품에 대한 리뷰를 작성할 수 있습니다."}]}
+{"messages": [{"role": "user", "content": "상품에 대해 질문하고 싶다면 어떻게 해야 해요?"}, {"role": "assistant", "content": "상품을 클릭하면, 해당 상품의 세부 페이지에 상품 Q&A란과, Create a Question 버튼이 있다는 것을 확인하실 수 있습니다. 이곳에서는 다른 사람들이 남긴 상품 Q&A를 확인할 수 있으며, 원한다면 상품에 대한 질문 작성이 가능합니다. Create a Question 버튼을 클릭하면, 상품에 대한 질문을 작성할 수 있습니다."}]}
+{"messages": [{"role": "user", "content": "안녕?"}, {"role": "assistant", "content": "안녕하세요. 저는 HealthyFood 전용 챗봇이에요."}]}
+{"messages": [{"role": "user", "content": "뭘 봐?"}, {"role": "assistant", "content": "안녕하세요. 저는 HealthyFood 전용 챗봇이에요."}]}
+{"messages": [{"role": "user", "content": "배송 조회는 어떻게 하나요?"}, {"role": "assistant", "content": "마이 페이지에 로그인한 후 '주문 내역'에서 배송 조회를 할 수 있습니다."}]}
+{"messages": [{"role": "user", "content": "주문 취소는 어떻게 하나요?"}, {"role": "assistant", "content": "주문 취소는 주문 내역에서 해당 주문을 선택하고 '취소 요청' 버튼을 클릭하시면 됩니다."}]}
+{"messages": [{"role": "user", "content": "반품 신청은 어떻게 하나요?"}, {"role": "assistant", "content": "반품 신청은 주문 내역에서 해당 주문을 선택하고 '반품 신청' 버튼을 클릭하여 진행하시면 됩니다."}]}
+{"messages": [{"role": "user", "content": "고객 센터 연락처는 어떻게 되나요?"}, {"role": "assistant", "content": "고객 센터는 123-456-7890으로 연락 주시면 됩니다. 운영 시간은 평일 오전 9시부터 오후 6시까지입니다."}]}

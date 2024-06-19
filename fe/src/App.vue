@@ -14,11 +14,11 @@
                         </svg>
                     </RouterLink>
 
-                    <a href="#">
+                    <RouterLink to="/nonproductfeed" class="text-purple-700">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"></path>
                         </svg>                              
-                    </a>
+                    </RouterLink>
 
                     <RouterLink to="/crop" class="text-purple-700">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -34,6 +34,14 @@
                 </div>
 
                 <div class="menu-right flex items-center space-x-4">
+                    <div>
+                        <ChatbotModal v-if="isChatModalViewed" @close-modal="isChatModalViewed = false">
+                            <ChatbotView />
+                        </ChatbotModal>
+                        <button  @click="isChatModalViewed = true" class="p-2 rounded-full hover:bg-gray-300">
+                            <svg width="50" height="30" viewBox="0 0 85 83" fill="none" xmlns="http://www.w3.org/2000/svg" class="stroke-current stroke-0 fill_white wh-7"><g clip-path="url(#icon-chTalk_svg__clip0_2433_2222)" fill="#000"><path d="M41.719 83C18.722 83 0 64.407 0 41.5S18.722 0 41.719 0c22.996 0 41.718 18.624 41.718 41.5 0 5.87-1.244 11.549-3.668 16.943l4.976 11.644a3.162 3.162 0 01-.415 3.173 3.272 3.272 0 01-2.998 1.205L69.18 72.69A41.6 41.6 0 0141.72 83zm0-76.654c-19.488 0-35.34 15.768-35.34 35.154 0 19.386 15.852 35.154 35.34 35.154 9.026 0 17.637-3.426 24.24-9.613a3.13 3.13 0 012.647-.825l8.038 1.174-3.318-7.773a3.288 3.288 0 01.064-2.634A34.518 34.518 0 0077.026 41.5c0-19.386-15.851-35.154-35.34-35.154h.033z"></path><path d="M25.038 46.671c2.871 0 5.199-2.315 5.199-5.171 0-2.856-2.328-5.172-5.2-5.172-2.87 0-5.198 2.316-5.198 5.172s2.328 5.171 5.199 5.171zM43.505 46.671c2.87 0 5.198-2.315 5.198-5.171 0-2.856-2.327-5.172-5.199-5.172-2.87 0-5.198 2.316-5.198 5.172s2.327 5.171 5.199 5.171zM59.93 46.671c2.872 0 5.2-2.315 5.2-5.171 0-2.856-2.328-5.172-5.2-5.172-2.87 0-5.199 2.316-5.199 5.172s2.328 5.171 5.2 5.171z"></path></g><defs><clipPath id="icon-chTalk_svg__clip0_2433_2222"><path fill="#fff" d="M0 0h85v83H0z"></path></clipPath></defs></svg>                             
+                        </button>
+                    </div>                     
                         <div class="flex items-center">
                             <button @click="isCartOpen = true" class="p-2 rounded-full hover:bg-gray-300">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -97,16 +105,20 @@
     import { RouterLink } from 'vue-router';
     import { ref } from 'vue'
     import ShoppingCart from './components/ShoppingCart.vue'
+    import ChatbotView from '@/views/ChatbotView.vue'
+    import ChatbotModal from '@/components/ChatbotModal.vue';
 
 
     export default {
         setup() {
             const userStore = useUserStore()
             const isCartOpen = ref(false)
+            const isChatModalViewed = ref(false)
 
             return {
                 userStore,
-                isCartOpen
+                isCartOpen,
+                isChatModalViewed
 
             }
         },
@@ -121,7 +133,9 @@
             Toast,
             FeedForm,
             ModalView,
-            ShoppingCart
+            ShoppingCart,
+            ChatbotView,
+            ChatbotModal
 
         },
 
