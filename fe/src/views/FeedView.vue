@@ -24,12 +24,14 @@
             <Trends />
         </div>
     </div>
+	<ScrollToTop></ScrollToTop>
 </template>
 
 <script>
 import axios from 'axios'
 import Trends from '../components/Trends.vue'
 import FeedListItem from '../components/FeedListItem.vue'
+import ScrollToTop from '../components/ScrollToTop.vue'
 
 export default {
     name: 'FeedView',
@@ -37,6 +39,7 @@ export default {
     components: {
         Trends,
         FeedListItem,
+        ScrollToTop,
     },
 
     data() {
@@ -44,35 +47,78 @@ export default {
             posts: [],
             body: '',
             category: 'all',
+            nextPageUrl: null,
+            isLoading: false,
+            debouncedGetFeed: null,
         }
     },
 
     mounted() {
         this.getFeed('all')
+        this.initDebouncedGetFeed()
+        window.addEventListener('scroll', this.handleScroll)
     },
 
+	beforeDestroy() {
+		window.removeEventListener('scroll', this.handleScroll)
+	},
+
     methods: {
-        getFeed(category) {
-            let url = '/api/posts/';
+        initDebouncedGetFeed() {
+            this.debouncedGetFeed = this.debounce(this.getFeed, 100);
+        },
+        debounce(func, delay) {
+            let timeoutId;
+            return (...args) => {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                func.apply(this, args);
+                }, delay);
+            };
+        },
+        getFeed(category, page = 1) {
+            if (this.isLoading) return;
+            this.isLoading = true;
+
+            let url = this.nextPageUrl || `/api/posts/?page=${page}`;
             if (category !== 'all') {
-                url += `?category=${category}`;
+                url += `&category=${category}`;
             }
 
             axios
                 .get(url)
                 .then(response => {
-                    console.log('data', response.data)
-
-                    this.posts = response.data
+                    this.posts.push(...response.data.results);
+                    this.nextPageUrl = response.data.next;
+                    this.isLoading = false;
+                    
+                    console.log('posts', this.posts)
                 })
                 .catch(error => {
                     console.log('error', error)
-                })
+                    this.isLoading = false;
+                });
+        },
+        handleScroll() {
+            const scrollHeight = document.documentElement.scrollHeight;
+            const scrollTop = document.documentElement.scrollTop;
+            const clientHeight = document.documentElement.clientHeight;
+
+            if (
+                Math.ceil(scrollTop + clientHeight) >= Math.floor(scrollHeight) &&
+                this.nextPageUrl &&
+                !this.isLoading
+            ) {
+                this.debouncedGetFeed(this.category);
+            }
         },
         categorizeProduct(category) {
             this.category = category
+            this.posts = []
+            this.nextPageUrl = null
+            this.isLoading = false;
             this.getFeed(category)
-        }
+        },
     }
 }
 </script>

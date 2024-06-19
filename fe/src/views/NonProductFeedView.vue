@@ -11,12 +11,15 @@
 			<Trends />
 		</div>
 	</div>
+	
+	<ScrollToTop></ScrollToTop>
 </template>
 
 <script>
 import axios from 'axios';
 import Trends from '../components/Trends.vue';
 import FeedItem from '../components/FeedItem.vue';
+import ScrollToTop from '../components/ScrollToTop.vue';
 
 export default {
 	name: 'NonProductFeedView',
@@ -24,6 +27,7 @@ export default {
 	components: {
 		Trends,
 		FeedItem,
+		ScrollToTop,
 	},
 
 	data() {
@@ -39,6 +43,10 @@ export default {
 		window.addEventListener('scroll', this.handleScroll)
 	},
 
+	beforeDestroy() {
+		window.removeEventListener('scroll', this.handleScroll)
+	},
+	
 	methods: {
 		getPost(page) {
 			if (this.isLoading) return;
