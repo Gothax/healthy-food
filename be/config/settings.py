@@ -71,7 +71,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
     'chatbot',
-    'mail'
+    'mail',
 ]
 
 MIDDLEWARE = [

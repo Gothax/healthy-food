@@ -3,15 +3,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import ChatRequestSerializer
 import requests
-import os
-from dotenv import load_dotenv
+from decouple import Config
 import json
 from django.http import JsonResponse
 
-load_dotenv('./chatbot/.env')
+config = Config('/config/.env')
 
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-
+OPENAI_API_KEY = config('OPENAI_API_KEY')
 FINE_TUNED_MODEL = 'ft:gpt-3.5-turbo-0125:::9bLelG2Q'  
 
 class ChatWithGpt(APIView):

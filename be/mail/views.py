@@ -6,11 +6,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import MailRequestSerializer
-import os
-from dotenv import load_dotenv
+from decouple import Config, RepositoryEnv
 
-# .env 파일 로드
-load_dotenv()
+env_path = 'config/.env'
+config = Config(RepositoryEnv(env_path))
 
 class SendMailAPIView(APIView):
     def post(self, request, *args, **kwargs):
@@ -22,9 +21,9 @@ class SendMailAPIView(APIView):
             text = serializer.validated_data['text']
             file = request.FILES.get('file')
 
-            send_email = os.getenv("SEND_EMAIL")
-            send_pwd = os.getenv("SEND_PWD")
-            recv_email = os.getenv("RECV_EMAIL")
+            send_email = config('SEND_EMAIL')
+            send_pwd = config('SEND_PWD')
+            recv_email = config('RECV_EMAIL')
 
             smtp_name = "smtp.naver.com"
             smtp_port = 587
