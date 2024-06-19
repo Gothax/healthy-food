@@ -24,12 +24,14 @@
             <Trends />
         </div>
     </div>
+	<ScrollToTop></ScrollToTop>
 </template>
 
 <script>
 import axios from 'axios'
 import Trends from '../components/Trends.vue'
 import FeedListItem from '../components/FeedListItem.vue'
+import ScrollToTop from '../components/ScrollToTop.vue'
 
 export default {
     name: 'FeedView',
@@ -37,6 +39,7 @@ export default {
     components: {
         Trends,
         FeedListItem,
+        ScrollToTop,
     },
 
     data() {
