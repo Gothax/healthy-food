@@ -18,28 +18,45 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"></path>
                 </svg>   
             </div>   
-            <div class="modal-wrap" v-show="showOptionModal" @click="closeModal">
-                <div class="modal-container" @click.stop="">
-                    <div 
-                        class="flex items-center space-x-2 cursor-pointer" 
-                        @click="deletePost"
-                        v-if="userStore.user.id == post.created_by.id"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-red-500">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                        </svg>
-        
-                        <div class="text-red-500 text-xs cursor-pointer">Delete post</div>
-                    </div>
+
+        <div>
+          <div class="modal-wrap" v-show="showOptionModal" @click="closeModal">
+            <div class="modal-container" @click.stop="">
+              <div class="flex items-center space-x-2 cursor-pointer mb-3" @click="toggleFeedModify" v-if="userStore.user.id == post.created_by.id">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-black-500">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232a2.828 2.828 0 114 4L9 19 5 20l1-4 10.232-10.768z"/>
+                </svg>
+                <div class="text-black-500 text-xs cursor-pointer">
+                  Modify post
                 </div>
+              </div>
+              <div class="flex items-center space-x-2 cursor-pointer mt-3" @click="deletePost" v-if="userStore.user.id == post.created_by.id">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-red-500">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                </svg>
+
+                <div class="text-red-500 text-xs cursor-pointer">
+                  Delete post
+                </div>
+              </div>
             </div>
+          </div>
+
+          <!-- FeedModify 모달 -->
+          <div v-if="showFeedModify" class="modal-wrap" @click="closeFeedModify">
+            <div class="modal-container" @click.stop="">
+              <FeedModify :post="post" @close="closeFeedModify" />
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
     
 
     <swiper :navigation="true" :pagination="{ clickable: true }">
         <swiper-slide v-for="image in post.attachments" :key="image.id">
-            <img :src="image.get_image" class="w-full mb-4 rounded-xl">
+            <img :src="image.get_image" class="max-w-full mb-4 rounded-xl">
         </swiper-slide>
     </swiper>
 
@@ -74,9 +91,6 @@
     </div>
     <p class="text-gray-600">{{ post.created_at_formatted }} 전</p>
 
-
-</div>
-
 </template>
 
 <script>
@@ -84,12 +98,15 @@ import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 import { useToastStore } from '@/stores/toast'
 import { Swiper, SwiperSlide } from 'swiper/vue';
-
+import ModalView from "@/components/ModalView.vue";
+import FeedModify from "@/components/FeedModify.vue";
 
 export default {
     components: {
-           Swiper,
-           SwiperSlide
+        Swiper,
+        SwiperSlide,
+        ModalView,
+        FeedModify,
        },
     props: {
         post: Object
@@ -108,7 +125,9 @@ export default {
         return {
             isLiked: false,
             showOptionModal: false,
-            productQuantity: 1
+            productQuantity: 1,
+            isModalViewed: false,
+            showFeedModify: false,
 
         }
     },
@@ -162,7 +181,13 @@ export default {
                     console.log("error", error);
                 })
         },
-
+        toggleFeedModify() {
+            this.showFeedModify = !this.showFeedModify;
+            this.showOptionModal = false; // 옵션 모달을 닫음
+        },
+        closeFeedModify() {
+            this.showFeedModify = false;
+        },
         toggleOptionModal() {
             this.showOptionModal = !this.showOptionModal
         },
@@ -211,5 +236,12 @@ export default {
   padding: 20px;
   box-sizing: border-box;
   z-index: 1001; 
+}
+.swiper-container {
+    display : flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    margin : auto;
 }
 </style>

@@ -12,17 +12,24 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from order.models import OrderItem
 import json
 from django.db import transaction
+from rest_framework.generics import ListAPIView
+from rest_framework.pagination import PageNumberPagination
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+class PostListPagination(PageNumberPagination):
+    page_size = 3
 
 
 @api_view(['GET'])
-def post_list(request):
+def product_list(request):
     category_name = request.GET.get('category', 'all')
+    posts = Post.objects.filter(content_type="product")
     
-    if category_name == 'all':
-        posts = Post.objects.all()
-    else:
+    if category_name != 'all':
         category = get_object_or_404(Category, name=category_name)
-        posts = Post.objects.filter(product__category=category)
+        posts = posts.filter(product__category=category)
     
     trend = request.GET.get('trend', '')
     if trend:
@@ -30,6 +37,22 @@ def post_list(request):
         
     serializer = PostSerializer(posts, many=True)
     return JsonResponse(serializer.data, safe=False)
+
+class PostListView(ListAPIView):
+    queryset = Post.objects.filter(content_type__in=['post', 'review'])
+    serializer_class = PostDetailSerializer
+    pagination_class = PostListPagination
+
+class PostListAPIView(APIView):
+    def get(self, request):
+        posts = Post.objects.all()
+        trend = request.GET.get('trend')
+
+        if trend:
+            posts = posts.filter(body__icontains='#' + trend)
+
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -81,6 +104,30 @@ def post_create(request):
         return JsonResponse(serializer.data, safe=False)
     else:
         return JsonResponse({'error': form.errors})
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def post_update(request, pk):
+    post = get_object_or_404(Post, pk=pk, created_by=request.user)
+    
+    body = request.POST.get('body', '')
+    attachments_to_remove = json.loads(request.POST.get('attachmentsToRemove', '[]'))
+
+    post.body = body
+    post.save()
+
+    for attachment_id in attachments_to_remove:
+        attachment = get_object_or_404(PostAttachment, pk=attachment_id, post=post)
+        attachment.delete()
+
+    new_attachments = []
+    for file in request.FILES.getlist('images'):
+        attachment = PostAttachment(image=file, post=post)
+        attachment.save()
+        new_attachments.append(attachment)
+
+    serializer = PostDetailSerializer(post)
+    return JsonResponse(serializer.data, safe=False)
     
 @api_view(['POST'])
 @permission_classes([IsSeller])

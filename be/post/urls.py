@@ -3,11 +3,14 @@ from . import api
 
 # config path('api/posts/', include('post.urls')),
 urlpatterns = [
-    path('', api.post_list, name='post_list'),
+    path('', api.product_list, name='product_list'),
+    path('feed/', api.PostListView.as_view(), name='post_list'),
+    path('story/', api.PostListAPIView.as_view(), name='post_story'),
     path('profile/<uuid:id>/', api.post_list_profile, name='post_list_profile'),
     path('<uuid:pk>/', api.post_detail, name='post_detail'),
     
     path('create/', api.post_create, name='post_create'),
+    path('update/<uuid:pk>/', api.post_update, name='post_update'),
     path('<uuid:pk>/delete/', api.post_delete, name='post_delete'),
     
     path('create/product/', api.create_product, name='create_product'),
@@ -20,3 +23,4 @@ urlpatterns = [
     path('trends/', api.get_trends, name='get_trends'),
     
 ]
+
