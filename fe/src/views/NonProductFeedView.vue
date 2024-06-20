@@ -3,7 +3,7 @@
 		<div class="main-center col-span-3 space-y-4">
 
 			<div v-for="post in posts" :key="post.id" class="p-4 bg-white border border-gray-200 rounded-lg">
-				<FeedItem :post="post" />
+				<FeedItem :post="post" :is-non-product="isNonProduct"/>
 			</div>
 		</div>
 		<div class="main-right col-span-1 space-y-4">
@@ -35,6 +35,7 @@ export default {
 			posts: [],
 			nextPageUrl: null,
 			isLoading: false,
+			isNonProduct: true,
 		}
 	},
 

@@ -44,6 +44,11 @@ class PostListView(ListAPIView):
     serializer_class = PostDetailSerializer
     pagination_class = PostListPagination
 
+    def get_queryset(self):
+        queryset = self.queryset
+        queryset = queryset.annotate(comments_count=Count('comments'))
+        return queryset
+
 
 @api_view(['GET'])
 def post_detail(request, pk):
