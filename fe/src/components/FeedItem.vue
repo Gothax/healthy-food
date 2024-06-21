@@ -68,7 +68,7 @@
                 <div class="modal-comment-container">
                     <div class="comment-container">
                         <div
-                            class="p-4 ml-6 bg-white border border-gray-200 rounded-lg"
+                            class="p-4 ml-6 bg-white border border-gray-200 rounded-lg mt-2"
                             v-for="comment in post.comments"
                             v-bind:key="comment.id"
                         >
@@ -278,14 +278,14 @@ export default {
   gap: 20px;
 }
 .comment-container {
-  flex: 1;
-  max-height: 400px;
+  height: 400px;
   overflow-y: auto;
+  padding: 10px 5px;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem; 
 }
 .comment-form-container {
   align-self: flex-end;
   width: 100%;
-  max-width: 800px;
-  padding: 20px 0;
 }
 </style>
