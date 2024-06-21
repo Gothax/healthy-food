@@ -17,21 +17,19 @@
       </div>
     </div>
 
-    <div class="image-grid" v-if="attachments.length">
-      <div
-        v-for="(attachment, index) in attachments"
-        :key="attachment.id"
-        class="image-card"
-      >
-        <img :src="attachment.get_image" class="w-full rounded-xl" />
-        <button
-          @click="removeAttachment(index)"
-          type="button"
-          class="remove-button"
-        >
-          <img src="@/assets/X.png" />
-        </button>
-      </div>
+    <div class="image-grid" v-if="attachments.length || urls.length">
+        <div v-for="(attachment, index) in filteredAttachments" :key="attachment.id" class="image-card">
+            <img :src="attachment.get_image" class="w-full rounded-xl" />
+            <button @click="removeAttachment(index)" type="button" class="remove-button">
+            <img src="@/assets/X.png" />
+            </button>
+        </div>
+        <div v-for="(url, index) in urls" :key="index" class="image-card">
+            <img :src="url" class="w-full rounded-xl" />
+            <button @click="removeUrl(index)" type="button" class="remove-button">
+            <img src="@/assets/X.png" />
+            </button>
+        </div>
     </div>
 
     <div class="p-4 border-t border-gray-100 flex justify-between">
@@ -61,23 +59,33 @@ export default {
   },
   data() {
     return {
-      body: this.post.body || "",
+    body: this.post.body || "",
       attachments: this.post.attachments || [],
       urls: [],
       attachmentsToRemove: [],
+      newFiles: [],  // 새로운 파일을 추적하기 위해 추가
     };
+  },
+  computed: {
+    filteredAttachments() {
+      // attachmentsToRemove에 포함되지 않은 attachments만 반환
+      return this.attachments.filter(
+        (attachment) => !this.attachmentsToRemove.includes(attachment.id)
+      );
+    },
   },
   methods: {
     onFileChange(e) {
       const files = e.target.files;
       this.urls = Array.from(files).map((file) => URL.createObjectURL(file));
+      this.newFiles = Array.from(files);
     },
     removeAttachment(index) {
-      this.attachmentsToRemove.push(this.attachments[index].id);
-      this.attachments.splice(index, 1);
+        this.attachmentsToRemove.push(this.filteredAttachments[index].id);
     },
     removeUrl(index) {
       this.urls.splice(index, 1);
+      this.newFiles.splice(index, 1);
     },
     submitForm() {
       console.log("submitForm", this.body);
@@ -85,8 +93,8 @@ export default {
       let formData = new FormData();
 
       // Append files
-      if (this.$refs.file.files.length > 0) {
-        Array.from(this.$refs.file.files).forEach((file) => {
+      if (this.newFiles.length > 0) {
+        this.newFiles.forEach((file) => {
           formData.append("images", file);
         });
       }

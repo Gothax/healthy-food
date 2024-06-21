@@ -55,8 +55,8 @@
     
 
     <swiper :navigation="true" :pagination="{ clickable: true }">
-        <swiper-slide v-for="image in post.attachments" :key="image.id">
-            <img :src="image.get_image" class="max-w-full mb-4 rounded-xl">
+        <swiper-slide v-for="image in post.attachments" :key="image.id" class="swiper-container">
+            <img :src="image.get_image" class="max-w-full mb-4 rounded-xl flex justify-center items-center" style="margin: auto;">
         </swiper-slide>
     </swiper>
 
