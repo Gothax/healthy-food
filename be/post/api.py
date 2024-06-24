@@ -17,9 +17,10 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.db.models import Q
 
 class PostListPagination(PageNumberPagination):
-    page_size = 3
+    page_size = 6
 
 
 @api_view(['GET'])
@@ -43,16 +44,12 @@ class PostListView(ListAPIView):
     serializer_class = PostDetailSerializer
     pagination_class = PostListPagination
 
-class PostListAPIView(APIView):
-    def get(self, request):
-        posts = Post.objects.all()
-        trend = request.GET.get('trend')
-
-        if trend:
-            posts = posts.filter(body__icontains='#' + trend)
-
-        serializer = PostSerializer(posts, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        queryset = Post.objects.filter(
+            Q(content_type='post') | Q(content_type='review')
+        )
+        queryset = queryset.annotate(comments_count=Count('comments'))
+        return queryset
 
 
 @api_view(['GET'])

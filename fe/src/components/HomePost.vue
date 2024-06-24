@@ -74,10 +74,10 @@ export default defineComponent({
   },
   methods: {
     fetchPosts() {
-      axios.get('/api/posts/story')
+      axios.get('/api/posts/feed')
         .then(response => {
           console.log(response.data); // API 응답 확인
-          this.posts = response.data
+          this.posts = response.data.results.filter(post => post.content_type === 'post' || post.content_type === 'review');
         })
         .catch(error => {
           console.error('Error fetching posts:', error)
@@ -91,9 +91,6 @@ export default defineComponent({
     },
     onTouchStart(event) {
       event.stopPropagation()
-    },
-    regularPosts() {
-      return this.posts.filter(post => post && post.content_type === 'post');
     },
   },
 });

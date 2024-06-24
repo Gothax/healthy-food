@@ -5,7 +5,6 @@ from . import api
 urlpatterns = [
     path('', api.product_list, name='product_list'),
     path('feed/', api.PostListView.as_view(), name='post_list'),
-    path('story/', api.PostListAPIView.as_view(), name='post_story'),
     path('profile/<uuid:id>/', api.post_list_profile, name='post_list_profile'),
     path('<uuid:pk>/', api.post_detail, name='post_detail'),
     
