@@ -20,6 +20,12 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                     </svg>
                                 </button>
+                                <RouterLink 
+                                    class="inline-block mr-2 py-4 px-3 bg-blue-600 text-xs text-white rounded-lg" 
+                                    to="/seller/sales"
+                                >
+                                    Sales
+                                </RouterLink>
                             </div>
                         </div>
                 </template>
@@ -121,6 +127,17 @@
                     </RouterLink>
                 </div>
             </div>
+            <div v-else-if="!user.is_seller && posts.length > 0" class="col-span-4 mt-8">
+                <div class="grid grid-cols-3 gap-4">
+                    <RouterLink :to="{name:'postview', params: {id: post.id}}" 
+                        class="space-y-4" 
+                        v-for="post in posts" 
+                        :key="post.id"
+                    >
+                        <FeedListItem :post="post" />
+                    </RouterLink>
+                </div>
+            </div>
 
             <!-- 리뷰 섹션 -->
             <div v-if="user.is_seller && reviews.length > 0" class="col-span-4 mt-8">
@@ -194,7 +211,7 @@ export default {
         },
         regularPosts() {
             return this.posts.filter(post => post.content_type === 'post');
-        }
+        },
     },
 
     mounted() {

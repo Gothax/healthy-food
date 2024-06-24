@@ -5,7 +5,12 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth.forms import PasswordChangeForm
 from .forms import SignupForm, ProfileForm
 from .models import User
-from .serializers import UserSerializer, UserSerializerNoIMG
+from .serializers import UserSerializer, UserSerializerNoIMG, SalesSerializer
+from .permissions import IsSeller
+from post.models import Product
+from order.models import OrderItem, Order
+from django.db.models.functions import TruncMonth, TruncYear
+from django.db.models import Sum, Count, F, Subquery
 
 @api_view(['GET'])
 def me(request):
@@ -14,6 +19,7 @@ def me(request):
         'name': request.user.name,
         'email': request.user.email,
         'user_image': request.user.get_userimage(),
+        'is_seller': request.user.is_seller,
     })
 
 @api_view(['GET'])
@@ -118,3 +124,58 @@ def register_seller(request):
     user.save()
 
     return JsonResponse({'message': 'You have been registered as a seller.'})
+
+@api_view(['GET'])
+@permission_classes([IsSeller])
+def sales(request):
+    seller = request.user
+    products = Product.objects.filter(posts__created_by=seller)
+
+    # Order 테이블을 기준으로 월별 주문 수를 카운트
+    monthly_orders = (
+        Order.objects
+        .filter(id__in=Subquery(
+            OrderItem.objects
+            .filter(product__in=products)
+            .values('order_id')
+        ))
+        .annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(total_count=Count('id'))
+        .order_by('month')
+    )
+    
+    # 각 월별로 판매 금액 계산
+    monthly_sales = (
+        OrderItem.objects
+        .filter(product__in=products)
+        .annotate(month=TruncMonth('order__created_at'))
+        .values('month')
+        .annotate(total_sales=Sum(F('product__price') * F('quantity')))
+        .order_by('month')
+        )
+    
+    # 월별 주문 수와 판매 금액을 합침
+    monthly_data = {}
+    for order in monthly_orders:
+        month = order['month'].date()
+        monthly_data[month] = {
+            'month': month,
+            'total_count': order['total_count'],
+            'total_sales': 0
+        }
+    
+    for sale in monthly_sales:
+        month = sale['month'].date()
+        if month in monthly_data:
+            monthly_data[month]['total_sales'] = sale['total_sales']
+    
+    # 리스트 형태로 변환
+    monthly_sales_list = list(monthly_data.values())
+    
+    # SalesSerializer가 기대하는 형식에 맞게 데이터 전달
+    serializer = SalesSerializer(data={'monthly_sales': monthly_sales_list})
+    if serializer.is_valid():
+        return JsonResponse(serializer.validated_data, safe=False)
+    else:
+        return JsonResponse({'error': 'Invalid data', 'details': serializer.errors}, status=400)

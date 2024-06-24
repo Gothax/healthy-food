@@ -13,6 +13,7 @@ export const useUserStore = defineStore({
             access: null,
             refresh: null,
             user_image: null,
+            isSeller: false,
         }
     }),
 
@@ -30,6 +31,7 @@ export const useUserStore = defineStore({
                 this.user.email = localStorage.getItem('user.email')
                 this.user.user_image = localStorage.getItem('user.user_image')
                 this.user.isAuthenticated = true
+                this.user.isSeller = localStorage.getItem('user.is_seller') === 'true' // localStorage.getItem('user.is_seller')가 문자열로 반환되기 때문에 논리적 비교로 boolean으로 변환
 
                 this.refreshToken()
 
@@ -60,6 +62,7 @@ export const useUserStore = defineStore({
             this.user.name = null
             this.user.email = null
             this.user.user_image = null
+            this.user.isSeller = false
 
             localStorage.setItem('user.access', '')
             localStorage.setItem('user.refresh', '')
@@ -67,6 +70,7 @@ export const useUserStore = defineStore({
             localStorage.setItem('user.name', '')
             localStorage.setItem('user.email', '')
             localStorage.setItem('user.user_image', '')
+            localStorage.setItem('user.is_seller', '')
         },
 
         setUserInfo(user) {
@@ -76,11 +80,13 @@ export const useUserStore = defineStore({
             this.user.name = user.name
             this.user.email = user.email
             this.user.user_image = user.user_image
+            this.user.isSeller = user.is_seller
 
             localStorage.setItem('user.id', this.user.id)
             localStorage.setItem('user.name', this.user.name)
             localStorage.setItem('user.email', this.user.email)
             localStorage.setItem('user.user_image', this.user.user_image)
+            localStorage.setItem('user.is_seller', this.user.isSeller)
 
             console.log('User', this.user)
         },
