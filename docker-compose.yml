@@ -28,6 +28,7 @@ services:
       - POSTGRES_PORT=${POSTGRES_PORT}
     volumes:
       - ./media:/django/media
+      - ./static:/django/static
     depends_on:
       - db
 
