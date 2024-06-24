@@ -14,6 +14,7 @@ import EditPasswordView from '../views/EditPasswordView.vue'
 import SalesView from '../views/SalesView.vue'
 import OrderPage from '../views/OrderPage.vue'
 import OrderHistory from '../views/OrderHistory.vue'
+import NonProductFeedView from '../views/NonProductFeedView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,6 +28,11 @@ const router = createRouter({
       path: '/feed',
       name: 'feed',
       component: FeedView
+    },
+    {
+      path: '/nonproductfeed',
+      name: 'nonproductfeed',
+      component: NonProductFeedView
     },
     {
       path: '/crop',
@@ -91,7 +97,15 @@ const router = createRouter({
     {
       path: '/order',
       name: 'OrderPage',
-      component: OrderPage
+      component: OrderPage,
+      beforeEnter: (to, from, next) => {
+        const userStore = useUserStore()
+        if (userStore.user.isAuthenticated) {
+          next()
+        } else {
+          next('/login')
+        }
+      }
     },
     {
       path: '/orderhistory',
