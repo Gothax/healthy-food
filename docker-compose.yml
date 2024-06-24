@@ -27,7 +27,7 @@ services:
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
     volumes:
-      - ./data/media:/django/media
+      - ./media:/django/media
     depends_on:
       - db
 
@@ -40,6 +40,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
+      - ./media:/django/media
     restart: always
     depends_on:
       - be
