@@ -1,6 +1,8 @@
 from datetime import timedelta
 from pathlib import Path
 import os
+from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,16 +12,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-_c^(=2r*!dn*u-z_83fq+eg24wlw$hvy=%gq%2&gkrzdnvemc1'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
 # production시 여기 docker container or ip
-WEBSITE_URL = 'http://127.0.0.1:8000'
-
+WEBSITE_URL = 'https://hfbetest.shop'
 # Application definition
 
 
@@ -41,19 +42,18 @@ REST_FRAMEWORK = {
 }
 
 
-CORS_ALLOW_ALL_ORIGINS = True
 
 # production 단계에서 frontend container
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://127.0.0.1:5173",
-# ]
+CORS_ALLOW_ALL_ORIGINS = False
 
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://127.0.0.1:5173",
+CORS_ALLOWED_ORIGINS = [
+    "https://healthy-food-snowy.vercel.app",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://healthy-food-snowy.vercel.app",
+]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -67,8 +67,6 @@ INSTALLED_APPS = [
     'post',
     'search',
     'order',
-    'widget_tweaks',
-    'drf_yasg',
     'corsheaders',
 ]
 
@@ -111,30 +109,34 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # production시 postgres
 
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('POSTGRES_DB'),
+        'USER': config('POSTGRES_USER'),
+        'PASSWORD': config('POSTGRES_PASSWORD'),
+        'HOST': config('POSTGRES_HOST'),
+        'PORT': config('POSTGRES_PORT'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    # {
-    #     'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    # },
-    # {
-    #     'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    # },
-    # {
-    #     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    # },
-    # {
-    #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    # },
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
 ]
 
 

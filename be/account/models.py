@@ -55,7 +55,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'
     EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['name']
     
     def get_userimage(self):
         return settings.WEBSITE_URL + self.user_image.url
