@@ -2,10 +2,10 @@
     <div class="mx-20 mt-2 mb-6">
         <button @click="categorizeProduct('all')" 
                 :class="['mx-1 px-4 py-2 rounded text-white', category === 'all' ? 'bg-blue-600' : 'bg-blue-500 hover:bg-blue-600']">전체</button>
-        <button @click="categorizeProduct('fruit')" 
-                :class="['mx-1 px-4 py-2 rounded text-white', category === 'fruit' ? 'bg-blue-600' : 'bg-blue-500 hover:bg-blue-600']">과일</button>
-        <button @click="categorizeProduct('vegetable')" 
-                :class="['mx-1 px-4 py-2 rounded text-white', category === 'vegetable' ? 'bg-blue-600' : 'bg-blue-500 hover:bg-blue-600']">채소</button>
+        <button @click="categorizeProduct('과일')" 
+                :class="['mx-1 px-4 py-2 rounded text-white', category === '과일' ? 'bg-blue-600' : 'bg-blue-500 hover:bg-blue-600']">과일</button>
+        <button @click="categorizeProduct('채소')" 
+                :class="['mx-1 px-4 py-2 rounded text-white', category === '채소' ? 'bg-blue-600' : 'bg-blue-500 hover:bg-blue-600']">채소</button>
     </div>
     <div class="max-w-7xl mx-auto grid grid-cols-4 gap-4">
 

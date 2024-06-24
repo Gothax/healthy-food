@@ -153,8 +153,11 @@ export default {
     },
     
     mounted() {
-        this.checkLikeStatus(this.post.id);
+        if (this.userStore.user.isAuthenticated) {
+            this.checkLikeStatus(this.post.id);
+        }
     },
+
 
 
     methods: {

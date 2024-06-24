@@ -97,7 +97,15 @@ const router = createRouter({
     {
       path: '/order',
       name: 'OrderPage',
-      component: OrderPage
+      component: OrderPage,
+      beforeEnter: (to, from, next) => {
+        const userStore = useUserStore()
+        if (userStore.user.isAuthenticated) {
+          next()
+        } else {
+          next('/login')
+        }
+      }
     },
     {
       path: '/orderhistory',
