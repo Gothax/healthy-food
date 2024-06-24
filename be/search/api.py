@@ -31,7 +31,6 @@ def get_embedding(text):
     return response_data['data'][0]['embedding']
 
 
-
 @api_view(['POST'])
 def search(request):
     data = request.data
