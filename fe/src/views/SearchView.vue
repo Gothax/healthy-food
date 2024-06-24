@@ -14,33 +14,27 @@
             </div>
 
 
-            <div v-if="users.length || posts.length">
-                <div 
-                    class="p-4 bg-white border border-gray-200 rounded-lg grid grid-cols-4 gap-4"
-                    v-if="users.length"
-                >
-                    <div 
-                        class="p-4 text-center bg-gray-100 rounded-lg"
-                        v-for="user in users"
-                        v-bind:key="user.id"
-                    >
-                        <img :src="user.get_userimage" class="mb-6 rounded-full">
-                    
-                        <p>
-                            <strong>
-                                <RouterLink :to="{name: 'profile', params:{'id': user.id}}">{{ user.name }}</RouterLink>
-                            </strong>
-                        </p>
-                    </div>
-                </div>
-
+            <div v-if="posts_from_products.length || posts_from_labels.length">
+                <!-- 상품 -->
+                <h2 class="text-xl font-bold">검색된 상품</h2>
                 <RouterLink :to="{name:'postview', params: {id: post.id}}" 
                     class="space-y-4" 
-                    v-for="post in posts" 
+                    v-for="post in posts_from_products" 
                     v-bind:key="post.id"
                 >
                     <FeedListItem v-bind:post="post" />
                 </RouterLink>
+
+                <!-- 리뷰, 일반 글 -->
+                <h2 class="text-xl font-bold mt-4">연관된 글</h2>
+                <RouterLink :to="{name:'postview', params: {id: post.id}}" 
+                    class="space-y-4" 
+                    v-for="post in posts_from_labels" 
+                    v-bind:key="post.id"
+                >
+                    <FeedListItem v-bind:post="post" />
+                </RouterLink>
+
             </div>
             <div v-else>
                 <p class="text-center text-gray-500">검색 결과가 없습니다.</p>
@@ -77,8 +71,9 @@ export default {
     data() {
         return {
             query: '',
-            users: [],
-            posts: []
+
+            posts_from_products: [],
+            posts_from_labels: []
         }
     },
 
@@ -96,8 +91,8 @@ export default {
                 .then(response => {
                     console.log('response:', response.data)
 
-                    this.users = response.data.users
-                    this.posts = response.data.posts
+                    this.posts_from_products = response.data.posts_from_products
+                    this.posts_from_labels = response.data.posts_from_labels
                 })
                 .catch(error => {
                     console.log('error:', error)

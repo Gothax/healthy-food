@@ -46,6 +46,10 @@ class Like(models.Model):
     created_by = models.ForeignKey(User, related_name='likes', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
+
+def default_embedding():
+    return [0.0] * 1536
+
 class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     CONTENT_TYPES = {
@@ -63,7 +67,7 @@ class Post(models.Model):
 
     content_type = models.CharField(max_length=10, choices=CONTENT_TYPES, default='post')
     product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.SET_NULL, related_name='posts')
-
+    label_embedding = VectorField(dimensions=1536, default=default_embedding)  
 
     class Meta:
         ordering = ('-created_at',)
