@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.db.models import Count
 from rest_framework.permissions import IsAuthenticated
@@ -17,6 +17,8 @@ from transformers import AutoImageProcessor, AutoModelForImageClassification
 from PIL import Image
 import torch
 from search.api import get_embedding
+from rest_framework.generics import ListAPIView
+from rest_framework.pagination import PageNumberPagination
 
 # hugging face model
 processor = AutoImageProcessor.from_pretrained("dima806/fruit_vegetable_image_detection")
@@ -63,16 +65,39 @@ label_map = {
 }
 
 
-@api_view(['GET'])
-def post_list(request):
-    posts = Post.objects.all()
-    
-    trend = request.GET.get('trend', '')
-    if trend:
-        posts = posts.filter(body__icontains='#' + trend)
-        
-    serializer = PostSerializer(posts, many=True)
-    return JsonResponse(serializer.data, safe=False)
+class PostListPagination(PageNumberPagination):
+    page_size = 6
+
+
+class ProductListView(ListAPIView):
+    queryset = Post.objects.filter(content_type="product")
+    serializer_class = PostSerializer
+    pagination_class = PostListPagination
+
+    def get_queryset(self):
+        queryset = self.queryset
+        category_name = self.request.query_params.get('category', 'all')
+        trend = self.request.query_params.get('trend', '')
+
+        if category_name != 'all':
+            category = get_object_or_404(Category, name=category_name)
+            queryset = queryset.filter(product__category=category)
+
+        if trend:
+            queryset = queryset.filter(body__icontains='#' + trend)
+
+        return queryset
+
+
+class PostListView(ListAPIView):
+    queryset = Post.objects.filter(content_type__in=['post', 'review'])
+    serializer_class = PostDetailSerializer
+    pagination_class = PostListPagination
+
+    def get_queryset(self):
+        queryset = self.queryset
+        queryset = queryset.annotate(comments_count=Count('comments'))
+        return queryset
 
 
 @api_view(['GET'])
@@ -252,7 +277,7 @@ def post_like(request, pk):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def check_liked(request, pk):
-    post = Post.objects.get(pk=pk)    
+    post = Post.objects.get(pk=pk)
     me = request.user
     is_liked = Like.objects.filter(created_by=me, post=post).exists()
     return JsonResponse({'isLiked': is_liked})
