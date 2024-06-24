@@ -58,7 +58,8 @@ export default {
                 id: null,
                 comments: []
             },
-            body: ''
+            body: '',
+            isNonProduct: false,
         }
     },
 
