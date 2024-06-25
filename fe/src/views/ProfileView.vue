@@ -164,6 +164,7 @@
 import axios from 'axios'
 import Trends from '../components/Trends.vue'
 import { useUserStore } from '@/stores/user'
+import { useToastStore } from '@/stores/toast'
 import FeedListItem from '../components/FeedListItem.vue'
 import ModalView from '../components/ModalView.vue'
 import ProductForm from '../components/ProductForm.vue'
@@ -177,9 +178,11 @@ export default {
 
     setup() {
         const userStore = useUserStore()
+        const toastStore = useToastStore()
 
         return {
-            userStore
+            userStore,
+            toastStore
         }
     },
 
@@ -202,7 +205,6 @@ export default {
             isFollowing: false,
             isModalViewed: false,
             business_number: '',
-
         }
     },
     computed: {
@@ -230,18 +232,30 @@ export default {
 
     methods: {
         registerAsSeller() {
-            axios
-                .post(`/api/seller/register/`, {
-                    business_number: this.business_number
-                })
-                .then(response => {
-                    console.log('data', response.data)
-                    this.$router.go();
-                })
-                .catch(error => {
-                    console.log('error', error)
-                })
-        },
+            const data = { "b_no": [this.business_number] };
+            const serviceKey = import.meta.env.VITE_APP_SERVICE_KEY;
+
+            axios({
+                method: 'post',
+                url: `https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=${serviceKey}`,
+                data: data,
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(result => {
+                if (result.data.data[0].b_stt_cd === '01') {
+                return axios.post(`/api/seller/register/`, { business_number: this.business_number });
+                }
+                return Promise.reject(new Error('Invalid business number'));
+            })
+            .then(response => {
+                this.toastStore.showToast(3000, response.data.message, 'bg-emerald-500');
+                setTimeout(() => this.$router.go(), 3000);
+            })
+            .catch(error => {
+                console.log('error', error);
+                this.toastStore.showToast(3000, error.message, 'bg-red-500');
+            });
+            },
         
         deletePost(id) {
             this.posts = this.posts.filter(post => post.id !== id)
