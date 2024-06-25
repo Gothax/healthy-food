@@ -49,9 +49,7 @@ class PostListView(ListAPIView):
     pagination_class = PostListPagination
 
     def get_queryset(self):
-        queryset = Post.objects.filter(
-            Q(content_type='post') | Q(content_type='review')
-        )
+        queryset = self.queryset
         queryset = queryset.annotate(comments_count=Count('comments'))
         return queryset
 
