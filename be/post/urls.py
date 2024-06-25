@@ -9,6 +9,7 @@ urlpatterns = [
     path('<uuid:pk>/', api.post_detail, name='post_detail'),
     
     path('create/', api.post_create, name='post_create'),
+    path('update/<uuid:pk>/', api.post_update, name='post_update'),
     path('<uuid:pk>/delete/', api.post_delete, name='post_delete'),
     
     path('create/product/', api.create_product, name='create_product'),
@@ -21,3 +22,4 @@ urlpatterns = [
     path('trends/', api.get_trends, name='get_trends'),
     
 ]
+
