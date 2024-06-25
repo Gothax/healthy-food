@@ -2,8 +2,13 @@ import uuid
 from django.db import models
 from django.utils.timesince import timesince
 from django.conf import settings
-
+import openai
 from account.models import User
+from decouple import config
+from pgvector.django import VectorField
+import requests
+
+OPENAI_API_KEY = config('OPENAI_API_KEY')
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -16,15 +21,34 @@ class Product(models.Model):
     name = models.CharField(max_length=100)
     specific = models.CharField(max_length=100)
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='products')
+    embeddings = VectorField(dimensions=1536, default=list)
     
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {OPENAI_API_KEY}',
+        }
+        data = {
+            "input": self.specific,
+            "model": "text-embedding-3-small"
+        }
+        response = requests.post('https://api.openai.com/v1/embeddings', headers=headers, json=data)
+        response_data = response.json()
+        self.embeddings = response_data['data'][0]['embedding']
+        super().save(*args, **kwargs)
 
 
 class Like(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_by = models.ForeignKey(User, related_name='likes', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+def default_embedding():
+    return [0.0] * 1536
 
 class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -43,7 +67,7 @@ class Post(models.Model):
 
     content_type = models.CharField(max_length=10, choices=CONTENT_TYPES, default='post')
     product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.SET_NULL, related_name='posts')
-
+    label_embedding = VectorField(dimensions=1536, default=default_embedding)  
 
     class Meta:
         ordering = ('-created_at',)

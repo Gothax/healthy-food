@@ -12,7 +12,7 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 
 // production 단계에서 여기
-axios.defaults.baseURL = 'http://127.0.0.1:8000'
+axios.defaults.baseURL = 'https://hfbetest.shop'
 
 const app = createApp(App)
 
