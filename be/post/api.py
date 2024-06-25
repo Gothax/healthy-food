@@ -19,6 +19,11 @@ import torch
 from search.api import get_embedding
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.db.models import Q
+
 
 # hugging face model
 processor = AutoImageProcessor.from_pretrained("dima806/fruit_vegetable_image_detection")
@@ -87,7 +92,6 @@ class ProductListView(ListAPIView):
             queryset = queryset.filter(body__icontains='#' + trend)
 
         return queryset
-
 
 class PostListView(ListAPIView):
     queryset = Post.objects.filter(content_type__in=['post', 'review'])
@@ -178,6 +182,30 @@ def post_create(request):
         return JsonResponse(serializer.data, safe=False)
     else:
         return JsonResponse({'error': form.errors})
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def post_update(request, pk):
+    post = get_object_or_404(Post, pk=pk, created_by=request.user)
+    
+    body = request.POST.get('body', '')
+    attachments_to_remove = json.loads(request.POST.get('attachmentsToRemove', '[]'))
+
+    post.body = body
+    post.save()
+
+    for attachment_id in attachments_to_remove:
+        attachment = get_object_or_404(PostAttachment, pk=attachment_id, post=post)
+        attachment.delete()
+
+    new_attachments = []
+    for file in request.FILES.getlist('images'):
+        attachment = PostAttachment(image=file, post=post)
+        attachment.save()
+        new_attachments.append(attachment)
+
+    serializer = PostDetailSerializer(post)
+    return JsonResponse(serializer.data, safe=False)
     
 @api_view(['POST'])
 @permission_classes([IsSeller])
