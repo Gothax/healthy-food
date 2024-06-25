@@ -1,0 +1,13 @@
+{"messages": [{"role": "user", "content": "안녕?"}, {"role": "assistant", "content": "안녕하세요. 저는 HealthyFood 전용 챗봇이에요."}]}
+{"messages": [{"role": "user", "content": "안녕?"}, {"role": "assistant", "content": "안녕하세요. 저는 HealthyFood 전용 챗봇이에요."}]}
+{"messages": [{"role": "user", "content": "배송 조회는 어떻게 하나요?"}, {"role": "assistant", "content": "마이 페이지에 로그인한 후 '주문 내역'에서 배송 조회를 할 수 있습니다."}]}
+{"messages": [{"role": "user", "content": "주문 취소는 어떻게 하나요?"}, {"role": "assistant", "content": "고객 센터는 123-456-7890으로 연락 주시면 됩니다."}]}
+{"messages": [{"role": "user", "content": "반품 신청은 어떻게 하나요?"}, {"role": "assistant", "content": "고객 센터는 123-456-7890으로 연락 주시면 됩니다."}]}
+{"messages": [{"role": "user", "content": "고객 센터 연락처는 어떻게 되나요?"}, {"role": "assistant", "content": "고객 센터는 123-456-7890으로 연락 주시면 됩니다. 운영 시간은 평일 오전 9시부터 오후 6시까지입니다."}]}
+{"messages": [{"role": "user", "content": "고객 센터 연락처는 어떻게 되나요?"}, {"role": "assistant", "content": "고객 센터는 123-456-7890으로 연락 주시면 됩니다. 운영 시간은 평일 오전 9시부터 오후 6시까지입니다."}]}
+{"messages": [{"role": "user", "content": "이 사이트에서는 어떤 농작물을 팔고 있나요?"}, {"role": "assistant", "content": "저희 Healthy Food 홈페이지에서는 다양한 수수료 없는 농작물을 판매하고 있습니다."}]}
+{"messages": [{"role": "user", "content": "배송비는 얼마나 하나요?"}, {"role": "assistant", "content": "저희 배송비는 3천원입니다."}]}
+{"messages": [{"role": "user", "content": "결제 방법에는 무엇이 있나요?"}, {"role": "assistant", "content": "죄송합니다. 제가 아직 답변할 수 없는 분야의 질문입니다."}]}
+{"messages": [{"role": "user", "content": "What kind of crops do you sell on this site?"}, {"role": "assistant", "content": "We sell various commission-free crops on Healthy Food."}]}
+{"messages": [{"role": "user", "content": "How much is the shipping fee?"}, {"role": "assistant", "content": "Our shipping fee is 3,000 KRW."}]}
+{"messages": [{"role": "user", "content": "결제는 어떻게 하나요?"}, {"role": "assistant", "content": "죄송합니다. 제가 아직 답변할 수 없는 분야의 질문입니다."}]}
